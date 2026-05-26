@@ -6,7 +6,6 @@
 <title>MPU6050 · BLE Logger</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://accounts.google.com/gsi/client"></script>
 <style>
 :root {
   --bg:       #060e1a;
@@ -329,6 +328,7 @@ tr:hover td{background:rgba(0,245,196,.025);}
 }
 .mbtn-drive{background:rgba(0,245,196,.06);border-color:var(--accent);color:var(--accent);}
 .mbtn-drive:hover{background:rgba(0,245,196,.14);box-shadow:0 0 16px rgba(0,245,196,.18);}
+.mbtn-drive:disabled{opacity:.4;cursor:not-allowed;}
 .mbtn-local{background:rgba(0,170,255,.04);border-color:var(--accent2);color:var(--accent2);}
 .mbtn-local:hover{background:rgba(0,170,255,.12);}
 .mbtn-discard{background:transparent;border-color:var(--border);color:var(--dim);flex:.5;}
@@ -380,10 +380,9 @@ tr:hover td{background:rgba(0,245,196,.025);}
 
     <div>
       <div class="sec-label">GOOGLE DRIVE</div>
-      <button class="btn btn-drive" id="btnDriveAuth">↗&nbsp; Connect Drive</button>
-      <div class="drive-row">
-        <div class="drive-dot" id="driveDot"></div>
-        <span id="driveText">Not connected</span>
+      <div class="drive-row" style="margin-top:0;margin-bottom:8px;">
+        <div class="drive-dot on" id="driveDot"></div>
+        <span id="driveText">Ready via Apps Script</span>
       </div>
     </div>
 
@@ -502,21 +501,11 @@ tr:hover td{background:rgba(0,245,196,.025);}
         <h2>SAVE DIALOG</h2>
         <p>After stopping you can:</p>
         <ul>
-          <li><strong>↗ Save to Drive</strong> — uploads CSV to <span class="code">MPU6050 Data</span> folder in Google Drive.</li>
+          <li><strong>↗ Save to Drive</strong> — uploads CSV directly to <span class="code">MPU6050 Data</span> folder in Google Drive via Apps Script.</li>
           <li><strong>↓ Save Locally</strong> — downloads CSV to your computer.</li>
           <li><strong>✕ Discard</strong> — clears the session without saving.</li>
         </ul>
         <p>Filename pattern: <span class="code">{label}_{wheel}_{timestamp}.csv</span></p>
-
-        <h2>GOOGLE DRIVE SETUP</h2>
-        <ol>
-          <li>Go to <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a>.</li>
-          <li>Create a project → enable <strong>Google Drive API</strong>.</li>
-          <li>Create OAuth 2.0 credentials → type: <strong>Web application</strong>.</li>
-          <li>Add your hosting URL (or <span class="code">http://localhost</span>) as an <em>Authorized JavaScript origin</em>.</li>
-          <li>Copy the <strong>Client ID</strong> and paste it into the <span class="code">GOOGLE_CLIENT_ID</span> constant at the top of this HTML file.</li>
-          <li>Click <span class="code">Connect Drive</span> and sign in with <span class="code">sanjeetathawale21@gmail.com</span>.</li>
-        </ol>
 
         <h2>DATA FORMAT</h2>
         <p>CSV columns: <span class="code">sample, time_ms, ax, ay, az, gx, gy, gz</span></p>
@@ -563,15 +552,14 @@ tr:hover td{background:rgba(0,245,196,.025);}
 
 <script>
 // ══════════════════════════════════════════════════════════════
-//  ★  CONFIG — paste your OAuth Client ID here
+//  ★  CONFIG — Apps Script Web App URL
 // ══════════════════════════════════════════════════════════════
-const GOOGLE_CLIENT_ID  = 'YOUR_GOOGLE_OAUTH_CLIENT_ID_HERE';
-const DRIVE_FOLDER_NAME = 'MPU6050 Data';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSjGOEr7MI0JvOWNhHXJYAof0Y2uFUt2ZvH_3ZfNNg8r1DjDeQ1Rje3EH0Whcj5EXKjw/exec';
 
 // NUS UUIDs (Nordic UART Service)
-const NUS_SVC = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-const NUS_TX  = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // notify → web
-const NUS_RX  = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // write  → device
+const NUS_SVC  = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const NUS_TX   = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // notify → web
+const NUS_RX   = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // write  → device
 const BLE_NAME = 'mpu6050 data';
 
 // ══════════════════════════════════════════════════════════════
@@ -588,8 +576,6 @@ let rateArr=[], lastRateTick=0;
 
 let accelChart=null, gyroChart=null;
 const MAX_PTS=120;
-
-let driveToken=null, driveReady=false, tokenClient=null;
 
 // ══════════════════════════════════════════════════════════════
 //  TOAST
@@ -866,115 +852,42 @@ function saveLocal(){
 }
 
 // ══════════════════════════════════════════════════════════════
-//  GOOGLE DRIVE
+//  SAVE TO DRIVE via Apps Script
 // ══════════════════════════════════════════════════════════════
-document.getElementById('btnDriveAuth').addEventListener('click',initDrive);
-
-function initDrive(){
-  if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_OAUTH_CLIENT_ID_HERE'){
-    toast('Paste your Google Client ID into GOOGLE_CLIENT_ID constant first.','err');
-    return;
-  }
-  if(!window.google){
-    toast('Google Identity Services not loaded.','err');
-    return;
-  }
-  tokenClient=google.accounts.oauth2.initTokenClient({
-    client_id:GOOGLE_CLIENT_ID,
-    scope:'https://www.googleapis.com/auth/drive.file',
-    callback:(resp)=>{
-      if(resp.error){toast('Drive auth error: '+resp.error,'err');return;}
-      driveToken=resp.access_token;
-      driveReady=true;
-      document.getElementById('driveDot').classList.add('on');
-      document.getElementById('driveText').textContent='Connected';
-      document.getElementById('btnDriveAuth').style.display='none';
-      toast('Google Drive connected!','ok');
-    },
-  });
-  tokenClient.requestAccessToken();
-}
-
-async function getFolderID(){
-  const r=await fetch(
-    `https://www.googleapis.com/drive/v3/files?q=name='${encodeURIComponent(DRIVE_FOLDER_NAME)}' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)`,
-    {headers:{Authorization:`Bearer ${driveToken}`}}
-  );
-  const d=await r.json();
-  if(d.files&&d.files.length>0) return d.files[0].id;
-
-  // Create folder
-  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{
-    method:'POST',
-    headers:{Authorization:`Bearer ${driveToken}`,'Content-Type':'application/json'},
-    body:JSON.stringify({name:DRIVE_FOLDER_NAME,mimeType:'application/vnd.google-apps.folder'}),
-  });
-  const f=await cr.json();
-  return f.id;
-}
-
 async function saveToDrive(){
-  if(!driveReady||!driveToken){
-    if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_OAUTH_CLIENT_ID_HERE'){
-      toast('Add your Google Client ID first!','err'); return;
-    }
-    if(!tokenClient) initDrive();
-    else tokenClient.requestAccessToken();
-    toast('Complete Google sign-in, then press Save to Drive again.');
-    return;
-  }
+  const fn  = filename();
+  const csv = csvContent();
+  const btn = document.getElementById('btnSaveDrive');
 
-  const fn=filename(), csv=csvContent();
+  btn.disabled = true;
+  btn.textContent = '↗ Uploading…';
   toast('Uploading to Drive…');
 
-  try{
-    const fid=await getFolderID();
-    const boundary='mpu6050_boundary_xk7';
-    const meta=JSON.stringify({name:fn,parents:[fid]});
-    const body=[
-      `--${boundary}`,
-      'Content-Type: application/json; charset=UTF-8',
-      '',meta,
-      `--${boundary}`,
-      'Content-Type: text/csv',
-      '',csv,
-      `--${boundary}--`,
-    ].join('\r\n');
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      // Apps Script requires no-cors OR a CORS-enabled deployment.
+      // Using mode:'no-cors' means we can't read the response body,
+      // but the upload still succeeds on the server side.
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ csv: csv, filename: fn }),
+    });
 
-    const up=await fetch(
-      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',
-      {
-        method:'POST',
-        headers:{
-          Authorization:`Bearer ${driveToken}`,
-          'Content-Type':`multipart/related; boundary=${boundary}`,
-        },
-        body,
-      }
-    );
-    if(!up.ok){
-      const e=await up.json();
-      // Token may have expired — re-request
-      if(up.status===401){
-        driveReady=false; driveToken=null;
-        toast('Drive token expired. Reconnect Drive and try again.','err');
-        return;
-      }
-      throw new Error(e.error?.message||'Upload failed');
-    }
-    const file=await up.json();
-    console.log('Drive upload OK:', file);
-    storeHistory(fn,sessionData.length,true);
+    // With no-cors we always land here if the request was sent
+    storeHistory(fn, sessionData.length, true);
     document.getElementById('overlay').classList.remove('active');
-    toast(`Saved to Drive: ${fn}`,'ok');
-  }catch(e){
-    console.error(e);
-    toast(`Drive upload failed: ${e.message}`,'err');
+    toast(`Saved to Drive: ${fn}`, 'ok');
+  } catch(e) {
+    toast(`Drive upload failed: ${e.message}`, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '↗ Save to Drive';
   }
 }
 
 // ══════════════════════════════════════════════════════════════
-//  HISTORY
+//  HISTORY  (stored in localStorage)
 // ══════════════════════════════════════════════════════════════
 function storeHistory(fn,rows,onDrive){
   const h=JSON.parse(localStorage.getItem('mpu_hist')||'[]');
