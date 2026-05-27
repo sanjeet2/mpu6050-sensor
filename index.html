@@ -328,7 +328,6 @@ tr:hover td{background:rgba(0,245,196,.025);}
 }
 .mbtn-drive{background:rgba(0,245,196,.06);border-color:var(--accent);color:var(--accent);}
 .mbtn-drive:hover{background:rgba(0,245,196,.14);box-shadow:0 0 16px rgba(0,245,196,.18);}
-.mbtn-drive:disabled{opacity:.4;cursor:not-allowed;}
 .mbtn-local{background:rgba(0,170,255,.04);border-color:var(--accent2);color:var(--accent2);}
 .mbtn-local:hover{background:rgba(0,170,255,.12);}
 .mbtn-discard{background:transparent;border-color:var(--border);color:var(--dim);flex:.5;}
@@ -380,9 +379,12 @@ tr:hover td{background:rgba(0,245,196,.025);}
 
     <div>
       <div class="sec-label">GOOGLE DRIVE</div>
-      <div class="drive-row" style="margin-top:0;margin-bottom:8px;">
-        <div class="drive-dot on" id="driveDot"></div>
-        <span id="driveText">Ready via Apps Script</span>
+      <div class="drive-row" style="margin-top:0;margin-bottom:4px;">
+        <div class="drive-dot on"></div>
+        <span style="color:var(--green);font-size:9px;letter-spacing:.1em;">Ready via Apps Script</span>
+      </div>
+      <div style="font-size:9px;color:var(--dim);line-height:1.6;margin-top:4px;">
+        Saves to <span style="color:var(--text)">MPU6050 Data</span> folder automatically
       </div>
     </div>
 
@@ -501,11 +503,25 @@ tr:hover td{background:rgba(0,245,196,.025);}
         <h2>SAVE DIALOG</h2>
         <p>After stopping you can:</p>
         <ul>
-          <li><strong>↗ Save to Drive</strong> — uploads CSV directly to <span class="code">MPU6050 Data</span> folder in Google Drive via Apps Script.</li>
+          <li><strong>↗ Save to Drive</strong> — uploads CSV to <span class="code">MPU6050 Data</span> folder in Google Drive.</li>
           <li><strong>↓ Save Locally</strong> — downloads CSV to your computer.</li>
           <li><strong>✕ Discard</strong> — clears the session without saving.</li>
         </ul>
         <p>Filename pattern: <span class="code">{label}_{wheel}_{timestamp}.csv</span></p>
+
+        <h2>GOOGLE APPS SCRIPT SETUP</h2>
+        <p>One-time setup to enable Drive saving. No OAuth popup — works instantly on any network.</p>
+        <ol>
+          <li>Go to <span class="code">script.google.com</span> → New Project.</li>
+          <li>Paste the <strong>doPost / doGet</strong> code provided.</li>
+          <li>Click <strong>Deploy → New deployment</strong>.</li>
+          <li>Type: <strong>Web app</strong>.</li>
+          <li>Execute as: <strong>Me (sanjeetathawale21@gmail.com)</strong>.</li>
+          <li>Who has access: <strong>Anyone</strong> ← critical for CORS.</li>
+          <li>Click <strong>Deploy</strong> → copy the Web App URL.</li>
+          <li>Paste it into <span class="code">APPS_SCRIPT_URL</span> in index.html.</li>
+        </ol>
+        <p>Files save automatically to <span class="code">MPU6050 Data</span> folder in that Google account.</p>
 
         <h2>DATA FORMAT</h2>
         <p>CSV columns: <span class="code">sample, time_ms, ax, ay, az, gx, gy, gz</span></p>
@@ -552,14 +568,16 @@ tr:hover td{background:rgba(0,245,196,.025);}
 
 <script>
 // ══════════════════════════════════════════════════════════════
-//  ★  CONFIG — Apps Script Web App URL
+//  ★  CONFIG
+//  Paste your deployed Apps Script URL below
+//  Works on ANY wifi / mobile data — both sides are HTTPS
 // ══════════════════════════════════════════════════════════════
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSjGOEr7MI0JvOWNhHXJYAof0Y2uFUt2ZvH_3ZfNNg8r1DjDeQ1Rje3EH0Whcj5EXKjw/exec';
 
 // NUS UUIDs (Nordic UART Service)
-const NUS_SVC  = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-const NUS_TX   = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // notify → web
-const NUS_RX   = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // write  → device
+const NUS_SVC = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const NUS_TX  = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // notify → web
+const NUS_RX  = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // write  → device
 const BLE_NAME = 'mpu6050 data';
 
 // ══════════════════════════════════════════════════════════════
@@ -852,42 +870,62 @@ function saveLocal(){
 }
 
 // ══════════════════════════════════════════════════════════════
-//  SAVE TO DRIVE via Apps Script
+//  SAVE TO DRIVE via Google Apps Script
+//  No OAuth popup needed — script runs server-side as the owner.
+//  Works from ANY network (WiFi, mobile data, corporate LAN)
+//  as long as the device has internet access.
 // ══════════════════════════════════════════════════════════════
 async function saveToDrive(){
   const fn  = filename();
   const csv = csvContent();
   const btn = document.getElementById('btnSaveDrive');
 
-  btn.disabled = true;
+  btn.disabled    = true;
   btn.textContent = '↗ Uploading…';
   toast('Uploading to Drive…');
 
   try {
+    // ✅ Standard fetch — NO mode:'no-cors'
+    // Apps Script deployed as "Anyone" automatically adds CORS headers.
     const response = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      // Apps Script requires no-cors OR a CORS-enabled deployment.
-      // Using mode:'no-cors' means we can't read the response body,
-      // but the upload still succeeds on the server side.
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ csv: csv, filename: fn }),
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ csv: csv, filename: fn }),
     });
 
-    // With no-cors we always land here if the request was sent
+    if (!response.ok) {
+      const txt = await response.text().catch(()=>'');
+      throw new Error(`Server error ${response.status}: ${txt}`);
+    }
+
+    const result = await response.json();
+
+    if (result.status !== 'ok') {
+      throw new Error(result.message || 'Unknown error from Apps Script');
+    }
+
     storeHistory(fn, sessionData.length, true);
     document.getElementById('overlay').classList.remove('active');
-    toast(`Saved to Drive: ${fn}`, 'ok');
+    toast(`✓ Saved to Drive: ${fn}`, 'ok');
+
   } catch(e) {
-    toast(`Drive upload failed: ${e.message}`, 'err');
+    console.error('Drive upload error:', e);
+    // Friendly hints for common failures
+    let hint = e.message;
+    if(hint.includes('Failed to fetch')){
+      hint = 'Network error — check internet connection';
+    } else if(hint.includes('CORS')){
+      hint = 'Apps Script not deployed as "Anyone" — see Guide tab';
+    }
+    toast(`Drive upload failed: ${hint}`, 'err');
   } finally {
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = '↗ Save to Drive';
   }
 }
 
 // ══════════════════════════════════════════════════════════════
-//  HISTORY  (stored in localStorage)
+//  HISTORY
 // ══════════════════════════════════════════════════════════════
 function storeHistory(fn,rows,onDrive){
   const h=JSON.parse(localStorage.getItem('mpu_hist')||'[]');
