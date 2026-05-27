@@ -3,29 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MPU6050 · BLE Logger</title>
+<title>MPU6050 Multi Board BLE Logger</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
 <style>
-:root {
-  --bg:       #060e1a;
-  --bg2:      #0c1a2e;
-  --bg3:      #0f2040;
-  --accent:   #00f5c4;
-  --accent2:  #00aaff;
-  --warn:     #ff4466;
-  --green:    #4ade80;
-  --gold:     #ffd700;
-  --purple:   #da70d6;
-  --orange:   #ff8c00;
-  --text:     #c8dff0;
-  --dim:      #4a7090;
-  --border:   #1a3050;
-  --font-m:   'IBM Plex Mono', monospace;
-  --font-d:   'Orbitron', monospace;
+:root{
+  --bg:#060e1a;
+  --bg2:#0c1a2e;
+  --bg3:#0f2040;
+  --accent:#00f5c4;
+  --accent2:#00aaff;
+  --warn:#ff4466;
+  --green:#4ade80;
+  --gold:#ffd700;
+  --purple:#da70d6;
+  --orange:#ff8c00;
+  --text:#c8dff0;
+  --dim:#4a7090;
+  --border:#1a3050;
+  --font-m:'IBM Plex Mono',monospace;
+  --font-d:'Orbitron',monospace;
 }
 
-*{margin:0;padding:0;box-sizing:border-box}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
 body{
   background:var(--bg);
@@ -37,113 +43,238 @@ body{
 
 body::before{
   content:'';
-  position:fixed;inset:0;
+  position:fixed;
+  inset:0;
   background-image:
-    linear-gradient(rgba(0,245,196,.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,245,196,.025) 1px,transparent 1px);
+    linear-gradient(rgba(0,245,196,.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,245,196,.02) 1px,transparent 1px);
   background-size:44px 44px;
   pointer-events:none;
   z-index:0;
 }
 
-/* ── HEADER ── */
 header{
-  display:flex;justify-content:space-between;align-items:center;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
   padding:13px 28px;
   background:rgba(6,14,26,.96);
   border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:100;
+  position:sticky;
+  top:0;
+  z-index:100;
   backdrop-filter:blur(12px);
 }
 
 .logo{
   font-family:var(--font-d);
-  font-size:13px;letter-spacing:.22em;
-  color:var(--accent);font-weight:600;
+  font-size:13px;
+  letter-spacing:.22em;
+  color:var(--accent);
+  font-weight:600;
 }
-.logo span{color:var(--dim);margin:0 8px;}
 
-.ble-status{
-  display:flex;align-items:center;gap:8px;
-  font-size:10px;letter-spacing:.14em;color:var(--dim);
+.logo span{
+  color:var(--dim);
+  margin:0 8px;
 }
-.ble-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:var(--dim);transition:background .3s;
-}
-.ble-dot.on{
-  background:var(--accent);
-  box-shadow:0 0 8px var(--accent);
-  animation:blink 2s infinite;
-}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* ── LAYOUT ── */
+.hdr-right{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+
+.board-count{
+  font-size:9px;
+  letter-spacing:.18em;
+  color:var(--dim);
+}
+
+.board-count span{
+  color:var(--accent);
+  font-family:var(--font-d);
+}
+
 .layout{
   display:flex;
   height:calc(100vh - 52px);
-  position:relative;z-index:1;
+  position:relative;
+  z-index:1;
 }
 
-/* ── SIDEBAR ── */
 .sidebar{
-  width:254px;min-width:254px;
+  width:250px;
+  min-width:250px;
   background:var(--bg2);
   border-right:1px solid var(--border);
-  padding:22px 14px;
-  display:flex;flex-direction:column;gap:22px;
+  padding:18px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
   overflow-y:auto;
 }
 
 .sec-label{
-  font-size:9px;letter-spacing:.22em;
-  color:var(--dim);margin-bottom:9px;
+  font-size:9px;
+  letter-spacing:.22em;
+  color:var(--dim);
+  margin-bottom:8px;
 }
 
 .btn{
   width:100%;
-  padding:11px 14px;
+  padding:10px 14px;
   border:1px solid var(--border);
   border-radius:8px;
   background:var(--bg3);
   color:var(--text);
-  font-family:var(--font-m);font-size:11px;
-  letter-spacing:.1em;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:7px;
+  font-family:var(--font-m);
+  font-size:11px;
+  letter-spacing:.1em;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
   transition:all .18s;
-  margin-bottom:0;
 }
-.btn+.btn{margin-top:8px}
-.btn:hover{border-color:var(--accent);color:var(--accent);}
-.btn:disabled{opacity:.25;cursor:not-allowed;pointer-events:none;}
-.btn-connect{border-color:var(--accent2);color:var(--accent2);}
-.btn-connect:hover{background:rgba(0,170,255,.08);}
-.btn-start{border-color:var(--accent);color:var(--accent);background:rgba(0,245,196,.04);}
-.btn-start:hover{background:rgba(0,245,196,.12);box-shadow:0 0 18px rgba(0,245,196,.18);}
-.btn-stop{border-color:var(--warn);color:var(--warn);background:rgba(255,68,102,.04);}
-.btn-stop:hover{background:rgba(255,68,102,.12);}
-.btn-drive{border-color:var(--green);color:var(--green);}
-.btn-drive:hover{background:rgba(74,222,128,.08);}
 
-.mbox{
-  background:var(--bg3);border:1px solid var(--border);
-  border-radius:8px;padding:15px;text-align:center;
+.btn + .btn{
+  margin-top:7px;
 }
-.mbox-time{
-  font-family:var(--font-d);font-size:28px;
-  color:var(--accent);letter-spacing:.04em;
+
+.btn:hover{
+  border-color:var(--accent);
+  color:var(--accent);
 }
-.mbox-rows{font-size:10px;color:var(--dim);margin-top:4px;}
+
+.btn:disabled{
+  opacity:.25;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+
+.btn-add{
+  border-color:var(--accent2);
+  color:var(--accent2);
+}
+
+.btn-add:hover{
+  background:rgba(0,170,255,.08);
+}
+
+.btn-start{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.btn-stop{
+  border-color:var(--warn);
+  color:var(--warn);
+}
+
+.board-slot{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px 12px;
+  transition:border-color .2s;
+  position:relative;
+  margin-bottom:7px;
+}
+
+.board-slot.active{
+  border-color:var(--slot-color,var(--accent));
+}
+
+.slot-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+
+.slot-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--dim);
+  flex-shrink:0;
+}
+
+.slot-dot.on{
+  background:var(--slot-color,var(--accent));
+  box-shadow:0 0 6px var(--slot-color,var(--accent));
+  animation:blink 2s infinite;
+}
+
+.slot-name{
+  font-size:10px;
+  color:var(--text);
+  letter-spacing:.07em;
+  flex:1;
+  margin-left:7px;
+}
+
+.slot-disc{
+  width:18px;
+  height:18px;
+  border:1px solid var(--border);
+  border-radius:4px;
+  background:transparent;
+  color:var(--dim);
+  font-size:9px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .15s;
+}
+
+.slot-disc:hover{
+  border-color:var(--warn);
+  color:var(--warn);
+}
+
+.slot-stats{
+  display:flex;
+  gap:8px;
+  font-size:9px;
+  color:var(--dim);
+}
+
+.slot-stats b{
+  color:var(--slot-color,var(--accent));
+  font-weight:500;
+}
 
 .drive-row{
-  display:flex;align-items:center;gap:6px;
-  font-size:9px;color:var(--dim);margin-top:8px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:9px;
+  color:var(--dim);
+  margin-top:6px;
 }
-.drive-dot{width:6px;height:6px;border-radius:50%;background:var(--dim);}
-.drive-dot.on{background:var(--green);}
 
-/* ── MAIN ── */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.drive-dot{
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:var(--dim);
+}
+
+.drive-dot.on{
+  background:var(--green);
+}
+
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
 
 .tabs{
   display:flex;
@@ -151,230 +282,614 @@ header{
   border-bottom:1px solid var(--border);
   background:var(--bg2);
 }
+
 .tab{
-  padding:15px 18px 13px;
-  font-size:11px;letter-spacing:.13em;
-  color:var(--dim);cursor:pointer;
+  padding:14px 16px 12px;
+  font-size:11px;
+  letter-spacing:.13em;
+  color:var(--dim);
+  cursor:pointer;
   border-bottom:2px solid transparent;
   transition:all .18s;
 }
-.tab:hover{color:var(--text);}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+.tab:hover{
+  color:var(--text);
+}
+
+.tab.active{
+  color:var(--accent);
+  border-bottom-color:var(--accent);
+}
 
 .tcont{
-  flex:1;overflow-y:auto;
-  padding:22px;display:none;
+  flex:1;
+  overflow-y:auto;
+  padding:18px;
+  display:none;
 }
-.tcont.active{display:block;}
 
-/* ── STAT CARDS ── */
-.stat-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:11px;margin-bottom:18px;
+.tcont.active{
+  display:block;
 }
-.stat-card{
-  background:var(--bg2);border:1px solid var(--border);
-  border-radius:10px;padding:15px 16px;
+
+.panels-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(680px,1fr));
+  gap:16px;
+}
+
+.no-boards{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:60vh;
+  gap:14px;
+  color:var(--dim);
+}
+
+.no-boards-icon{
+  font-size:36px;
+  opacity:.4;
+}
+
+.no-boards h3{
+  font-family:var(--font-d);
+  font-size:11px;
+  letter-spacing:.2em;
+  color:var(--dim);
+}
+
+.no-boards p{
+  font-size:10px;
+  letter-spacing:.08em;
+  text-align:center;
+  line-height:1.8;
+}
+
+.board-panel{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  --bc:var(--accent);
   transition:border-color .2s;
 }
-.stat-card:hover{border-color:var(--accent);}
-.slabel{font-size:9px;letter-spacing:.2em;color:var(--dim);margin-bottom:7px;}
-.sval{
-  font-family:var(--font-d);font-size:17px;
-  color:var(--accent);letter-spacing:.04em;
-}
-.sunit{font-size:8px;color:var(--dim);margin-top:3px;letter-spacing:.1em;}
 
-/* ── CHARTS ── */
-.chart-grid{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:11px;margin-bottom:18px;
+.board-panel:hover{
+  border-color:var(--bc);
 }
-.chart-box{
-  background:var(--bg2);border:1px solid var(--border);
-  border-radius:10px;padding:14px;
-}
-.chart-title{font-size:9px;letter-spacing:.18em;color:var(--dim);margin-bottom:10px;}
 
-/* ── TABLE ── */
-.tbox{
-  background:var(--bg2);border:1px solid var(--border);
-  border-radius:10px;overflow:hidden;
-}
-.tbox-hdr{
+.panel-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
   padding:12px 16px;
   border-bottom:1px solid var(--border);
-  font-size:9px;letter-spacing:.2em;color:var(--dim);
+  background:var(--bg3);
 }
-.tscroll{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;}
+
+.panel-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--dim);
+  flex-shrink:0;
+}
+
+.panel-dot.on{
+  background:var(--bc);
+  box-shadow:0 0 8px var(--bc);
+  animation:blink 2s infinite;
+}
+
+@keyframes blink{
+  0%,100%{opacity:1}
+  50%{opacity:.4}
+}
+
+.panel-name{
+  font-family:var(--font-d);
+  font-size:11px;
+  letter-spacing:.16em;
+  color:var(--text);
+  flex:1;
+}
+
+.panel-badge{
+  font-size:8px;
+  padding:2px 8px;
+  border-radius:4px;
+  background:rgba(0,0,0,.3);
+  border:1px solid var(--border);
+  color:var(--dim);
+  letter-spacing:.1em;
+}
+
+.panel-acts{
+  display:flex;
+  gap:6px;
+}
+
+.pbtn{
+  padding:5px 13px;
+  font-size:9px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:transparent;
+  color:var(--dim);
+  font-family:var(--font-m);
+  cursor:pointer;
+  letter-spacing:.08em;
+  transition:all .15s;
+}
+
+.pbtn.start{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.pbtn.stop{
+  border-color:var(--warn);
+  color:var(--warn);
+}
+
+.pbtn:hover{
+  background:rgba(0,245,196,.08);
+}
+
+.pbtn:disabled{
+  opacity:.25;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+
+.panel-body{
+  padding:12px 14px;
+}
+
+.panel-stats{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:7px;
+  margin-bottom:10px;
+}
+
+.pstat{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:8px 7px;
+  text-align:center;
+}
+
+.pstat-lbl{
+  font-size:7px;
+  letter-spacing:.18em;
+  color:var(--dim);
+  margin-bottom:4px;
+}
+
+.pstat-val{
+  font-family:var(--font-d);
+  font-size:11px;
+  letter-spacing:.02em;
+}
+
+.pstat-unit{
+  font-size:7px;
+  color:var(--dim);
+  margin-top:2px;
+}
+
+.panel-table{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  margin-bottom:10px;
+}
+
+.ptable-hdr{
+  padding:7px 12px;
+  border-bottom:1px solid var(--border);
+  font-size:8px;
+  letter-spacing:.18em;
+  color:var(--dim);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.ptimer{
+  font-family:var(--font-d);
+  font-size:11px;
+  color:var(--bc,var(--accent));
+}
+
+.ptable-scroll{
+  overflow-x:auto;
+  max-height:170px;
+  overflow-y:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
 th{
-  padding:9px 11px;font-size:9px;
-  letter-spacing:.12em;color:var(--dim);
-  text-align:left;background:var(--bg3);
+  padding:6px 8px;
+  font-size:8px;
+  letter-spacing:.1em;
+  color:var(--dim);
+  text-align:left;
+  background:var(--bg);
   border-bottom:1px solid var(--border);
 }
-td{
-  padding:7px 11px;font-size:10px;
-  color:var(--text);
-  border-bottom:1px solid rgba(26,48,80,.4);
-}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(0,245,196,.025);}
 
-/* ── HISTORY ── */
-.h-empty{
-  text-align:center;padding:60px;
-  color:var(--dim);font-size:11px;letter-spacing:.1em;
+td{
+  padding:5px 8px;
+  font-size:9px;
+  color:var(--text);
+  border-bottom:1px solid rgba(26,48,80,.3);
 }
+
+tr:hover td{
+  background:rgba(0,245,196,.02);
+}
+
+.panel-charts{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.pchart-box{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
+}
+
+.pchart-lbl{
+  font-size:8px;
+  letter-spacing:.15em;
+  color:var(--dim);
+  margin-bottom:6px;
+}
+
+.h-empty{
+  text-align:center;
+  padding:60px;
+  color:var(--dim);
+  font-size:11px;
+  letter-spacing:.1em;
+}
+
 .sess{
-  background:var(--bg2);border:1px solid var(--border);
-  border-radius:10px;padding:15px 18px;
-  margin-bottom:11px;
-  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 16px;
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
   transition:border-color .2s;
 }
-.sess:hover{border-color:var(--accent);}
-.sess-info{flex:1;}
-.sess-name{font-size:12px;color:var(--text);margin-bottom:4px;}
-.sess-meta{font-size:9px;color:var(--dim);letter-spacing:.08em;}
-.sess-acts{display:flex;gap:7px;}
-.btn-xs{
-  padding:5px 12px;font-size:9px;
-  border:1px solid var(--border);border-radius:6px;
-  background:transparent;color:var(--dim);
-  font-family:var(--font-m);cursor:pointer;
-  letter-spacing:.08em;transition:all .18s;
-}
-.btn-xs:hover{border-color:var(--accent);color:var(--accent);}
-.btn-xs.d:hover{border-color:var(--warn);color:var(--warn);}
 
-/* ── GUIDE ── */
-.guide{max-width:660px;}
+.sess:hover{
+  border-color:var(--accent);
+}
+
+.sess-info{
+  flex:1;
+}
+
+.sess-name{
+  font-size:11px;
+  color:var(--text);
+  margin-bottom:4px;
+}
+
+.sess-meta{
+  font-size:9px;
+  color:var(--dim);
+  letter-spacing:.07em;
+}
+
+.sess-acts{
+  display:flex;
+  gap:7px;
+}
+
+.btn-xs{
+  padding:5px 11px;
+  font-size:9px;
+  border:1px solid var(--border);
+  border-radius:5px;
+  background:transparent;
+  color:var(--dim);
+  font-family:var(--font-m);
+  cursor:pointer;
+  letter-spacing:.07em;
+  transition:all .15s;
+}
+
+.btn-xs:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.btn-xs.d:hover{
+  border-color:var(--warn);
+  color:var(--warn);
+}
+
+.guide{
+  max-width:760px;
+}
+
 .guide h2{
-  font-family:var(--font-d);font-size:11px;
-  color:var(--accent);letter-spacing:.16em;
+  font-family:var(--font-d);
+  font-size:11px;
+  color:var(--accent);
+  letter-spacing:.16em;
   margin:26px 0 10px;
 }
-.guide h2:first-child{margin-top:0;}
-.guide p,.guide li{
-  font-size:11px;color:var(--text);
-  line-height:1.85;margin-bottom:6px;
-}
-.guide ol,.guide ul{margin-left:18px;margin-bottom:8px;}
-.code{
-  background:var(--bg3);border:1px solid var(--border);
-  border-radius:4px;padding:1px 7px;
-  font-family:var(--font-m);font-size:10px;color:var(--accent);
-}
-.guide a{color:var(--accent2);}
 
-/* ── MODAL ── */
-.overlay{
-  position:fixed;inset:0;
-  background:rgba(6,14,26,.88);
-  display:none;align-items:center;justify-content:center;
-  z-index:1000;backdrop-filter:blur(8px);
+.guide h2:first-child{
+  margin-top:0;
 }
-.overlay.active{display:flex;}
+
+.guide p,
+.guide li{
+  font-size:11px;
+  color:var(--text);
+  line-height:1.85;
+  margin-bottom:6px;
+}
+
+.guide ol,
+.guide ul{
+  margin-left:18px;
+  margin-bottom:8px;
+}
+
+.code{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:1px 7px;
+  font-family:var(--font-m);
+  font-size:10px;
+  color:var(--accent);
+}
+
+.board-table{
+  width:100%;
+  border-collapse:collapse;
+  margin:10px 0;
+}
+
+.board-table th{
+  padding:7px 10px;
+  font-size:9px;
+  letter-spacing:.12em;
+  color:var(--dim);
+  text-align:left;
+  background:var(--bg3);
+  border:1px solid var(--border);
+}
+
+.board-table td{
+  padding:7px 10px;
+  font-size:10px;
+  color:var(--text);
+  border:1px solid var(--border);
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(6,14,26,.88);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  backdrop-filter:blur(8px);
+}
+
+.overlay.active{
+  display:flex;
+}
+
 .modal{
-  background:var(--bg2);border:1px solid var(--border);
-  border-radius:16px;padding:30px;
-  width:470px;max-width:95vw;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:28px;
+  width:450px;
+  max-width:95vw;
   animation:mIn .22s ease;
 }
+
 @keyframes mIn{
   from{transform:scale(.96) translateY(8px);opacity:0}
   to{transform:scale(1) translateY(0);opacity:1}
 }
+
 .modal-title{
-  font-family:var(--font-d);font-size:13px;
-  color:var(--accent);letter-spacing:.16em;margin-bottom:6px;
+  font-family:var(--font-d);
+  font-size:12px;
+  color:var(--accent);
+  letter-spacing:.16em;
+  margin-bottom:5px;
 }
+
 .modal-meta{
-  font-size:10px;color:var(--dim);
-  margin-bottom:22px;padding-bottom:18px;
+  font-size:10px;
+  color:var(--dim);
+  margin-bottom:20px;
+  padding-bottom:16px;
   border-bottom:1px solid var(--border);
 }
-.fg{margin-bottom:16px;}
+
+.fg{
+  margin-bottom:14px;
+}
+
 .flabel{
-  display:block;font-size:9px;
-  letter-spacing:.16em;color:var(--dim);margin-bottom:7px;
+  display:block;
+  font-size:9px;
+  letter-spacing:.16em;
+  color:var(--dim);
+  margin-bottom:6px;
 }
-.finput,.fselect{
-  width:100%;padding:9px 13px;
-  background:var(--bg3);border:1px solid var(--border);
-  border-radius:7px;color:var(--text);
-  font-family:var(--font-m);font-size:12px;
-  outline:none;transition:border-color .18s;
-}
-.finput:focus,.fselect:focus{border-color:var(--accent);}
+
+.finput,
 .fselect{
-  cursor:pointer;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a7090' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 13px center;
+  width:100%;
+  padding:9px 12px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:7px;
+  color:var(--text);
+  font-family:var(--font-m);
+  font-size:12px;
+  outline:none;
+  transition:border-color .18s;
 }
-.fselect option{background:var(--bg3);color:var(--text);}
+
+.finput:focus,
+.fselect:focus{
+  border-color:var(--accent);
+}
+
+.fselect{
+  cursor:pointer;
+}
 
 .macts{
-  display:flex;gap:9px;margin-top:22px;
-  padding-top:18px;border-top:1px solid var(--border);
+  display:flex;
+  gap:8px;
+  margin-top:20px;
+  padding-top:16px;
+  border-top:1px solid var(--border);
 }
+
 .mbtn{
-  flex:1;padding:11px;border-radius:8px;
-  font-family:var(--font-m);font-size:10px;
-  letter-spacing:.1em;cursor:pointer;
-  border:1px solid;transition:all .18s;
+  flex:1;
+  padding:10px;
+  border-radius:7px;
+  font-family:var(--font-m);
+  font-size:10px;
+  letter-spacing:.1em;
+  cursor:pointer;
+  border:1px solid;
+  transition:all .15s;
 }
-.mbtn-drive{background:rgba(0,245,196,.06);border-color:var(--accent);color:var(--accent);}
-.mbtn-drive:hover{background:rgba(0,245,196,.14);box-shadow:0 0 16px rgba(0,245,196,.18);}
-.mbtn-local{background:rgba(0,170,255,.04);border-color:var(--accent2);color:var(--accent2);}
-.mbtn-local:hover{background:rgba(0,170,255,.12);}
-.mbtn-discard{background:transparent;border-color:var(--border);color:var(--dim);flex:.5;}
-.mbtn-discard:hover{border-color:var(--warn);color:var(--warn);}
 
-/* ── TOAST ── */
+.mbtn-drive{
+  background:rgba(0,245,196,.06);
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.mbtn-local{
+  background:rgba(0,170,255,.04);
+  border-color:var(--accent2);
+  color:var(--accent2);
+}
+
+.mbtn-discard{
+  background:transparent;
+  border-color:var(--border);
+  color:var(--dim);
+  flex:.4;
+}
+
 .toasts{
-  position:fixed;bottom:22px;right:22px;
-  display:flex;flex-direction:column;gap:7px;z-index:2000;
+  position:fixed;
+  bottom:22px;
+  right:22px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  z-index:2000;
 }
-.toast{
-  background:var(--bg2);border:1px solid var(--border);
-  border-radius:8px;padding:11px 15px;
-  font-size:10px;letter-spacing:.06em;color:var(--text);
-  animation:tIn .28s ease;max-width:290px;
-}
-.toast.ok{border-color:var(--accent);color:var(--accent);}
-.toast.err{border-color:var(--warn);color:var(--warn);}
-@keyframes tIn{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
 
-/* scrollbar */
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-::-webkit-scrollbar-thumb:hover{background:var(--dim)}
+.toast{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px 14px;
+  font-size:10px;
+  letter-spacing:.06em;
+  color:var(--text);
+  animation:tIn .28s ease;
+  max-width:280px;
+}
+
+.toast.ok{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.toast.err{
+  border-color:var(--warn);
+  color:var(--warn);
+}
+
+@keyframes tIn{
+  from{transform:translateX(16px);opacity:0}
+  to{transform:translateX(0);opacity:1}
+}
+
+::-webkit-scrollbar{
+  width:4px;
+  height:4px;
+}
+
+::-webkit-scrollbar-track{
+  background:var(--bg);
+}
+
+::-webkit-scrollbar-thumb{
+  background:var(--border);
+  border-radius:2px;
+}
 </style>
 </head>
+
 <body>
 
-<!-- HEADER -->
 <header>
-  <div class="logo">MPU6050 <span>·</span> BLE LOGGER</div>
-  <div class="ble-status">
-    <div class="ble-dot" id="bleDot"></div>
-    <span id="bleText">NOT CONNECTED</span>
+  <div class="logo">MPU6050 <span>·</span> MULTI-BOARD LOGGER</div>
+  <div class="hdr-right">
+    <div class="board-count">BOARDS CONNECTED: <span id="boardCount">0</span></div>
   </div>
 </header>
 
 <div class="layout">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar">
 
     <div>
-      <div class="sec-label">CONNECT</div>
-      <button class="btn btn-connect" id="btnConnect">⟨/⟩&nbsp; Connect BLE</button>
-      <button class="btn" id="btnDisconnect" disabled>Disconnect</button>
+      <div class="sec-label">ADD BOARD</div>
+      <button class="btn btn-add" id="btnAddBoard">＋ Connect Board</button>
+      <p style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.7;letter-spacing:.05em;">
+        Click once for each board. Each board gets its own panel.
+      </p>
+    </div>
+
+    <div>
+      <div class="sec-label">ACTIVE BOARDS</div>
+      <div id="sideboardList">
+        <div style="font-size:9px;color:var(--dim);letter-spacing:.08em;">No boards connected</div>
+      </div>
     </div>
 
     <div>
@@ -384,197 +899,104 @@ tr:hover td{background:rgba(0,245,196,.025);}
         <span style="color:var(--green);font-size:9px;letter-spacing:.1em;">Ready via Apps Script</span>
       </div>
       <div style="font-size:9px;color:var(--dim);line-height:1.6;margin-top:4px;">
-        Saves to <span style="color:var(--text)">MPU6050 Data</span> folder automatically
+        Folder: <span style="color:var(--text)">MPU6050 Data</span>
       </div>
     </div>
 
     <div>
-      <div class="sec-label">MEASUREMENT</div>
-      <div class="mbox">
-        <div class="mbox-time" id="timerDisplay">0.0s</div>
-        <div class="mbox-rows" id="rowsDisplay">0 rows</div>
-      </div>
-    </div>
-
-    <div>
-      <div class="sec-label">CONTROL</div>
-      <button class="btn btn-start" id="btnStart" disabled>▶&nbsp; START</button>
-      <button class="btn btn-stop" id="btnStop" disabled>■&nbsp; STOP</button>
+      <div class="sec-label">QUICK ACTIONS</div>
+      <button class="btn btn-start" id="btnStartAll" disabled>▶ Start All</button>
+      <button class="btn btn-stop" id="btnStopAll" disabled>■ Stop All</button>
     </div>
 
   </aside>
 
-  <!-- MAIN -->
   <div class="main">
+
     <div class="tabs">
       <div class="tab active" data-tab="live">Live</div>
       <div class="tab" data-tab="history">History</div>
       <div class="tab" data-tab="guide">Guide</div>
     </div>
 
-    <!-- LIVE -->
     <div class="tcont active" id="tab-live">
-
-      <!-- ROW 1: Accel cards -->
-      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:8px;">
-        <div class="stat-card">
-          <div class="slabel">AX</div>
-          <div class="sval" id="statAx">--</div>
-          <div class="sunit">m/s²</div>
-        </div>
-        <div class="stat-card">
-          <div class="slabel">AY</div>
-          <div class="sval" id="statAy">--</div>
-          <div class="sunit">m/s²</div>
-        </div>
-        <div class="stat-card">
-          <div class="slabel">AZ</div>
-          <div class="sval" id="statAz">--</div>
-          <div class="sunit">m/s²</div>
-        </div>
-        <div class="stat-card">
-          <div class="slabel">RATE</div>
-          <div class="sval" id="statRate">--</div>
-          <div class="sunit">samples/sec</div>
-        </div>
+      <div id="noBoardsMsg" class="no-boards">
+        <div class="no-boards-icon">📡</div>
+        <h3>NO BOARDS CONNECTED</h3>
+        <p>
+          Click <strong>Connect Board</strong> for each nRF board.<br>
+          Each board gets its own data panel.<br>
+          Example: nrf33 and nrf40 at the same time.
+        </p>
       </div>
-
-      <!-- ROW 2: Gyro cards -->
-      <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px;">
-        <div class="stat-card" style="border-color:#2a1a40;">
-          <div class="slabel" style="color:#9a60aa;">GX</div>
-          <div class="sval" id="statGx" style="color:#da70d6;">--</div>
-          <div class="sunit">rad/s</div>
-        </div>
-        <div class="stat-card" style="border-color:#2a1a40;">
-          <div class="slabel" style="color:#9a60aa;">GY</div>
-          <div class="sval" id="statGy" style="color:#da70d6;">--</div>
-          <div class="sunit">rad/s</div>
-        </div>
-        <div class="stat-card" style="border-color:#2a1a40;">
-          <div class="slabel" style="color:#9a60aa;">GZ</div>
-          <div class="sval" id="statGz" style="color:#da70d6;">--</div>
-          <div class="sunit">rad/s</div>
-        </div>
-      </div>
-
-      <!-- TABLE FIRST (as requested) -->
-      <div class="tbox" style="margin-bottom:18px;">
-        <div class="tbox-hdr">LATEST ROWS — live feed</div>
-        <div class="tscroll">
-          <table>
-            <thead>
-              <tr>
-                <th>time_ms</th><th>ax</th><th>ay</th><th>az</th>
-                <th>gx</th><th>gy</th><th>gz</th>
-              </tr>
-            </thead>
-            <tbody id="tbody">
-              <tr>
-                <td colspan="7" style="text-align:center;color:var(--dim);padding:22px;font-size:10px;letter-spacing:.1em">
-                  Waiting for data…
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- CHARTS BELOW -->
-      <div class="chart-grid">
-        <div class="chart-box">
-          <div class="chart-title">ACCELEROMETER — ax · ay · az (m/s²)</div>
-          <canvas id="chartAccel" height="110"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">GYROSCOPE — gx · gy · gz (rad/s)</div>
-          <canvas id="chartGyro" height="110"></canvas>
-        </div>
-      </div>
+      <div class="panels-grid" id="panelsGrid"></div>
     </div>
 
-    <!-- HISTORY -->
     <div class="tcont" id="tab-history">
       <div id="histList"></div>
     </div>
 
-    <!-- GUIDE -->
     <div class="tcont" id="tab-guide">
       <div class="guide">
-        <h2>HARDWARE SETUP</h2>
-        <p>Wire MPU6050 to nRF52833 DK:</p>
-        <ul>
-          <li>VCC → 3.3V</li>
-          <li>GND → GND</li>
-          <li>SDA → P0.26 (configure in DTS overlay)</li>
-          <li>SCL → P0.27 (configure in DTS overlay)</li>
-          <li>AD0 → GND → I²C address 0x68</li>
-        </ul>
+        <h2>MULTI-BOARD ARCHITECTURE</h2>
+        <p>Each Nordic board works as a BLE peripheral. The laptop/phone browser works as the BLE central. Click Connect Board once per module.</p>
 
-        <h2>BLE DEVICE NAME</h2>
-        <p>Set <span class="code">CONFIG_BT_DEVICE_NAME="mpu6050 data"</span> in your <span class="code">prj.conf</span>. The web app filters by this name exactly.</p>
+        <h2>FIRMWARE NAME SETTING</h2>
+        <p>Each physical board needs a unique BLE name in <span class="code">prj.conf</span>.</p>
 
-        <h2>CONNECTING</h2>
+        <table class="board-table">
+          <tr><th>Board</th><th>prj.conf</th><th>Website name</th></tr>
+          <tr><td>nRF52833 DK</td><td><span class="code">CONFIG_BT_DEVICE_NAME="nrf33"</span></td><td>nrf33</td></tr>
+          <tr><td>nRF52840 DK</td><td><span class="code">CONFIG_BT_DEVICE_NAME="nrf40"</span></td><td>nrf40</td></tr>
+        </table>
+
+        <h2>CONNECTING BOTH BOARDS</h2>
         <ol>
-          <li>Click <span class="code">Connect BLE</span> — a browser dialog appears.</li>
-          <li>Select <span class="code">mpu6050 data</span> from the list.</li>
-          <li>Press <span class="code">START</span> to begin data streaming.</li>
-          <li>Live charts and the table update in real time.</li>
-          <li>Press <span class="code">STOP</span> — a save dialog appears.</li>
+          <li>Flash nRF52833 with BLE name <span class="code">nrf33</span>.</li>
+          <li>Flash nRF52840 with BLE name <span class="code">nrf40</span>.</li>
+          <li>Open this website in Chrome or Edge.</li>
+          <li>Click <span class="code">Connect Board</span> and select <span class="code">nrf33</span>.</li>
+          <li>Click <span class="code">Connect Board</span> again and select <span class="code">nrf40</span>.</li>
+          <li>Use <span class="code">Start All</span> to start both.</li>
         </ol>
 
-        <h2>SAVE DIALOG</h2>
-        <p>After stopping you can:</p>
-        <ul>
-          <li><strong>↗ Save to Drive</strong> — uploads CSV to <span class="code">MPU6050 Data</span> folder in Google Drive.</li>
-          <li><strong>↓ Save Locally</strong> — downloads CSV to your computer.</li>
-          <li><strong>✕ Discard</strong> — clears the session without saving.</li>
-        </ul>
-        <p>Filename pattern: <span class="code">{label}_{wheel}_{timestamp}.csv</span></p>
+        <h2>SCALING TO 10 BOARDS</h2>
+        <p>Add every board in the <span class="code">BOARDS</span> object in the JavaScript section. Each board must have a unique BLE name.</p>
 
-        <h2>GOOGLE APPS SCRIPT SETUP</h2>
-        <p>One-time setup to enable Drive saving. No OAuth popup — works instantly on any network.</p>
-        <ol>
-          <li>Go to <span class="code">script.google.com</span> → New Project.</li>
-          <li>Paste the <strong>doPost / doGet</strong> code provided.</li>
-          <li>Click <strong>Deploy → New deployment</strong>.</li>
-          <li>Type: <strong>Web app</strong>.</li>
-          <li>Execute as: <strong>Me (sanjeetathawale21@gmail.com)</strong>.</li>
-          <li>Who has access: <strong>Anyone</strong> ← critical for CORS.</li>
-          <li>Click <strong>Deploy</strong> → copy the Web App URL.</li>
-          <li>Paste it into <span class="code">APPS_SCRIPT_URL</span> in index.html.</li>
-        </ol>
-        <p>Files save automatically to <span class="code">MPU6050 Data</span> folder in that Google account.</p>
+        <p>Example:</p>
+        <p><span class="code">'wheel01': { label: 'Wheel 01', color: '#00f5c4' }</span></p>
 
         <h2>DATA FORMAT</h2>
-        <p>CSV columns: <span class="code">sample, time_ms, ax, ay, az, gx, gy, gz</span></p>
-        <p>Accel in m/s² · Gyro in rad/s · time in milliseconds</p>
+        <p>Firmware should send:</p>
+        <p><span class="code">sample,time_ms,ax,ay,az,gx,gy,gz</span></p>
+
+        <h2>GOOGLE DRIVE</h2>
+        <p>No Apps Script change is required if it already accepts <span class="code">csv</span> and <span class="code">filename</span>. Files are saved with board name in filename.</p>
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- SAVE MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="modal-title">SAVE SESSION</div>
-    <div class="modal-meta" id="modalMeta">0 samples · 0.0s</div>
+    <div class="modal-meta" id="modalMeta">0 samples</div>
 
     <div class="fg">
       <label class="flabel">TEST LABEL</label>
-      <input type="text" class="finput" id="testLabel" placeholder="aligned_test_1" value="aligned_test_1">
+      <input type="text" class="finput" id="testLabel" value="aligned_test_1">
     </div>
 
     <div class="fg">
       <label class="flabel">WHEEL POSITION</label>
       <select class="fselect" id="wheelPos">
-        <option value="FL">FL</option>
-        <option value="FR">FR</option>
-        <option value="RL">RL</option>
-        <option value="RR">RR</option>
-        <option value="one_wheel_test">one_wheel_test</option>
-        <option value="truck_wheel_1">truck_wheel_1</option>
+        <option>FL</option>
+        <option>FR</option>
+        <option>RL</option>
+        <option>RR</option>
+        <option>one_wheel_test</option>
+        <option>truck_wheel_1</option>
       </select>
     </div>
 
@@ -586,430 +1008,722 @@ tr:hover td{background:rgba(0,245,196,.025);}
   </div>
 </div>
 
-<!-- TOASTS -->
 <div class="toasts" id="toasts"></div>
 
 <script>
-// ══════════════════════════════════════════════════════════════
-//  ★  CONFIG
-//  Paste your deployed Apps Script URL below
-//  Works on ANY wifi / mobile data — both sides are HTTPS
-// ══════════════════════════════════════════════════════════════
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSjGOEr7MI0JvOWNhHXJYAof0Y2uFUt2ZvH_3ZfNNg8r1DjDeQ1Rje3EH0Whcj5EXKjw/exec';
-
-// NUS UUIDs (Nordic UART Service)
-const NUS_SVC = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-const NUS_TX  = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // notify → web
-const NUS_RX  = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // write  → device
-// ── Supported boards ──────────────────────────────────────────
-// Add more entries here any time you add a new board.
-// key   = exact BLE advertised name (set in prj.conf)
-// label = friendly label shown in the UI header
 const BOARDS = {
-  'nrf33' : { label: 'nRF52833 DK', color: '#00f5c4' },
-  'nrf40' : { label: 'nRF52840 DK', color: '#00aaff' },
+  'nrf33':  { label: 'nRF52833 DK', color: '#00f5c4' },
+  'nrf40':  { label: 'nRF52840 DK', color: '#00aaff' },
+
+  /*
+    For future modules, add like this:
+
+    'wheel01': { label: 'Wheel 01', color: '#ffd700' },
+    'wheel02': { label: 'Wheel 02', color: '#da70d6' },
+    'wheel03': { label: 'Wheel 03', color: '#ff8c00' },
+  */
 };
-// Legacy name kept so old firmware still works
-const BLE_NAMES = [...Object.keys(BOARDS)];
-let connectedBoardName = ''; // set when device connects
 
-// ══════════════════════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════════════════════
-let bleDevice=null, rxChar=null, txChar=null;
-let isConnected=false, isStreaming=false;
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwxLg2AP1FrSoa91cxgH1g5KUi-YVhJIfdKh-GsELsWhA5QyoR7PZTRc1dL-qTFm2vVqA/exec';
 
-let sessionData=[];
-let sessionStart=null;
-let timerInt=null;
+const NUS_SVC = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const NUS_TX  = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+const NUS_RX  = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
 
-let rateArr=[], lastRateTick=0;
+const MAX_PTS = 80;
 
-let accelChart=null, gyroChart=null;
-const MAX_PTS=120;
+const connections = new Map();
 
-// ══════════════════════════════════════════════════════════════
-//  TOAST
-// ══════════════════════════════════════════════════════════════
-function toast(msg,type=''){
-  const el=document.createElement('div');
-  el.className=`toast ${type}`;
-  el.textContent=msg;
+let pendingSave = null;
+
+function toast(msg, type=''){
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
   document.getElementById('toasts').appendChild(el);
-  setTimeout(()=>el.remove(),3600);
+  setTimeout(() => el.remove(), 3800);
 }
 
-// ══════════════════════════════════════════════════════════════
-//  TABS
-// ══════════════════════════════════════════════════════════════
-document.querySelectorAll('.tab').forEach(t=>{
-  t.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tcont').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tcont').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     document.getElementById(`tab-${t.dataset.tab}`).classList.add('active');
-    if(t.dataset.tab==='history') renderHistory();
+    if(t.dataset.tab === 'history') renderHistory();
   });
 });
 
-// ══════════════════════════════════════════════════════════════
-//  BLE
-// ══════════════════════════════════════════════════════════════
-document.getElementById('btnConnect').addEventListener('click',connectBLE);
-document.getElementById('btnDisconnect').addEventListener('click',()=>{
-  if(bleDevice&&bleDevice.gatt.connected) bleDevice.gatt.disconnect();
-});
+document.getElementById('btnAddBoard').addEventListener('click', addBoard);
 
-async function connectBLE(){
+async function addBoard(){
   if(!navigator.bluetooth){
-    toast('Web Bluetooth not supported. Use Chrome or Edge.','err');
+    toast('Web Bluetooth not supported. Use Chrome or Edge.', 'err');
     return;
   }
-  try{
-    // Build filters array — one entry per supported board name
-    const filters = BLE_NAMES.map(n=>({name:n}));
 
-    bleDevice=await navigator.bluetooth.requestDevice({
+  try{
+    const filters = Object.keys(BOARDS).map(name => ({ name }));
+
+    const device = await navigator.bluetooth.requestDevice({
       filters,
-      optionalServices:[NUS_SVC],
+      optionalServices: [NUS_SVC],
     });
 
-    // Remember which board connected
-    connectedBoardName = bleDevice.name || '';
+    const bname = device.name || '';
 
-    bleDevice.addEventListener('gattserverdisconnected',onDisconn);
-    const server=await bleDevice.gatt.connect();
-    const svc=await server.getPrimaryService(NUS_SVC);
-    rxChar=await svc.getCharacteristic(NUS_RX);
-    txChar=await svc.getCharacteristic(NUS_TX);
+    if(connections.has(bname)){
+      toast(`${bname} is already connected`, 'err');
+      return;
+    }
+
+    const server = await device.gatt.connect();
+    const svc = await server.getPrimaryService(NUS_SVC);
+
+    const rxChar = await svc.getCharacteristic(NUS_RX);
+    const txChar = await svc.getCharacteristic(NUS_TX);
+
     await txChar.startNotifications();
-    txChar.addEventListener('characteristicvaluechanged',onNUS);
-    isConnected=true;
-    setBLEUI(true);
-    const board = BOARDS[connectedBoardName];
-    toast(`Connected: ${board ? board.label : connectedBoardName}`, 'ok');
-  }catch(e){
-    toast(`BLE: ${e.message}`,'err');
-  }
-}
 
-function onDisconn(){
-  isConnected=false; isStreaming=false;
-  stopTimer();
-  setBLEUI(false);
-  toast('BLE disconnected');
-}
-
-function setBLEUI(on){
-  const dot  = document.getElementById('bleDot');
-  const txt  = document.getElementById('bleText');
-  dot.classList.toggle('on', on);
-  if(on){
-    const board = BOARDS[connectedBoardName];
-    const label = board ? board.label : connectedBoardName;
-    const color = board ? board.color : '#00f5c4';
-    txt.textContent = label.toUpperCase();
-    txt.style.color = color;
-    dot.style.background = color;
-    dot.style.boxShadow  = `0 0 8px ${color}`;
-  } else {
-    txt.textContent = 'NOT CONNECTED';
-    txt.style.color = '';
-    dot.style.background = '';
-    dot.style.boxShadow  = '';
-    connectedBoardName = '';
-  }
-  document.getElementById('btnConnect').disabled=on;
-  document.getElementById('btnDisconnect').disabled=!on;
-  document.getElementById('btnStart').disabled=!on;
-  document.getElementById('btnStop').disabled=true;
-}
-
-// ══════════════════════════════════════════════════════════════
-//  NUS / DATA PARSING
-// ══════════════════════════════════════════════════════════════
-let nusBuf='';
-const dec=new TextDecoder();
-
-function onNUS(ev){
-  nusBuf+=dec.decode(ev.target.value);
-  let idx;
-  while((idx=nusBuf.indexOf('\n'))!==-1){
-    const line=nusBuf.slice(0,idx).trim();
-    nusBuf=nusBuf.slice(idx+1);
-    if(!line||line.startsWith('sample')) continue;
-    const p=line.split(',');
-    if(p.length!==8) continue;
-    const row={
-      sample:parseInt(p[0]),
-      time_ms:parseInt(p[1]),
-      ax:parseFloat(p[2]),
-      ay:parseFloat(p[3]),
-      az:parseFloat(p[4]),
-      gx:parseFloat(p[5]),
-      gy:parseFloat(p[6]),
-      gz:parseFloat(p[7]),
+    const conn = {
+      device,
+      rxChar,
+      txChar,
+      name: bname,
+      board: BOARDS[bname] || { label: bname, color: '#c8dff0' },
+      data: [],
+      buf: '',
+      start: null,
+      timer: null,
+      streaming: false,
+      rateArr: [],
+      accelChart: null,
+      gyroChart: null,
     };
-    if(isNaN(row.sample)) continue;
-    sessionData.push(row);
-    updateLive(row);
-    pushCharts(row);
-    calcRate();
+
+    connections.set(bname, conn);
+
+    txChar.addEventListener('characteristicvaluechanged', ev => onNUS(bname, ev));
+
+    device.addEventListener('gattserverdisconnected', () => removeBoard(bname));
+
+    createPanel(bname);
+    updateSidebar();
+    updateGlobalButtons();
+    updateNoBoardsMsg();
+
+    toast(`Connected: ${conn.board.label}`, 'ok');
+
+  }catch(e){
+    if(!String(e.message).includes('cancelled')){
+      toast(`BLE error: ${e.message}`, 'err');
+    }
   }
 }
 
-function updateLive(r){
-  document.getElementById('statAx').textContent=r.ax.toFixed(3);
-  document.getElementById('statAy').textContent=r.ay.toFixed(3);
-  document.getElementById('statAz').textContent=r.az.toFixed(3);
-  document.getElementById('statGx').textContent=r.gx.toFixed(4);
-  document.getElementById('statGy').textContent=r.gy.toFixed(4);
-  document.getElementById('statGz').textContent=r.gz.toFixed(4);
-  document.getElementById('rowsDisplay').textContent=`${sessionData.length} rows`;
+function removeBoard(bname){
+  const conn = connections.get(bname);
+  if(!conn) return;
 
-  const tbody=document.getElementById('tbody');
-  const tr=document.createElement('tr');
-  tr.innerHTML=`<td>${r.time_ms}</td><td>${r.ax.toFixed(4)}</td><td>${r.ay.toFixed(4)}</td><td>${r.az.toFixed(4)}</td><td>${r.gx.toFixed(4)}</td><td>${r.gy.toFixed(4)}</td><td>${r.gz.toFixed(4)}</td>`;
-  tbody.insertBefore(tr,tbody.firstChild);
-  while(tbody.children.length>20) tbody.removeChild(tbody.lastChild);
+  if(conn.timer){
+    clearInterval(conn.timer);
+  }
+
+  connections.delete(bname);
+
+  const panel = document.getElementById(`panel-${safeId(bname)}`);
+  if(panel){
+    panel.remove();
+  }
+
+  updateSidebar();
+  updateGlobalButtons();
+  updateNoBoardsMsg();
+
+  toast(`Disconnected: ${bname}`);
 }
 
-function calcRate(){
-  const now=Date.now();
-  rateArr.push(now);
-  rateArr=rateArr.filter(t=>t>=now-2000);
-  if(now-lastRateTick>400){
-    document.getElementById('statRate').textContent=(rateArr.length/2).toFixed(1);
-    lastRateTick=now;
+function disconnectBoard(bname){
+  const conn = connections.get(bname);
+
+  if(conn?.device?.gatt?.connected){
+    conn.device.gatt.disconnect();
+  }else{
+    removeBoard(bname);
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-//  CHARTS
-// ══════════════════════════════════════════════════════════════
-function makeChartOpts(){
-  return{
+const dec = new TextDecoder();
+
+function onNUS(bname, ev){
+  const conn = connections.get(bname);
+  if(!conn) return;
+
+  conn.buf += dec.decode(ev.target.value);
+
+  let idx;
+
+  while((idx = conn.buf.indexOf('\n')) !== -1){
+    const line = conn.buf.slice(0, idx).trim();
+    conn.buf = conn.buf.slice(idx + 1);
+
+    if(!line || line.startsWith('sample')){
+      continue;
+    }
+
+    const p = line.split(',');
+
+    if(p.length !== 8){
+      continue;
+    }
+
+    const row = {
+      sample: parseInt(p[0]),
+      time_ms: parseInt(p[1]),
+      ax: parseFloat(p[2]),
+      ay: parseFloat(p[3]),
+      az: parseFloat(p[4]),
+      gx: parseFloat(p[5]),
+      gy: parseFloat(p[6]),
+      gz: parseFloat(p[7]),
+    };
+
+    if(isNaN(row.sample)){
+      continue;
+    }
+
+    conn.data.push(row);
+
+    updatePanelLive(bname, row);
+    pushPanelCharts(bname, row);
+    calcRate(bname);
+    updateSidebar();
+  }
+}
+
+const enc = new TextEncoder();
+
+async function startBoard(bname){
+  const conn = connections.get(bname);
+  if(!conn || conn.streaming) return;
+
+  conn.data = [];
+  conn.buf = '';
+  conn.rateArr = [];
+  conn.start = Date.now();
+  conn.streaming = true;
+
+  resetPanelCharts(bname);
+  clearPanelTable(bname);
+
+  await conn.rxChar.writeValue(enc.encode('START'));
+
+  startTimer(bname);
+
+  document.getElementById(`pbtn-start-${safeId(bname)}`).disabled = true;
+  document.getElementById(`pbtn-stop-${safeId(bname)}`).disabled = false;
+
+  toast(`${conn.board.label} started`, 'ok');
+}
+
+async function stopBoard(bname){
+  const conn = connections.get(bname);
+  if(!conn || !conn.streaming) return;
+
+  await conn.rxChar.writeValue(enc.encode('STOP'));
+
+  conn.streaming = false;
+
+  if(conn.timer){
+    clearInterval(conn.timer);
+  }
+
+  const elapsed = conn.start ? ((Date.now() - conn.start) / 1000).toFixed(1) : '0.0';
+
+  document.getElementById(`pbtn-start-${safeId(bname)}`).disabled = false;
+  document.getElementById(`pbtn-stop-${safeId(bname)}`).disabled = true;
+
+  pendingSave = { bname, elapsed };
+
+  document.getElementById('modalMeta').textContent =
+    `${conn.data.length} samples · ${elapsed}s · ${conn.board.label}`;
+
+  document.getElementById('overlay').classList.add('active');
+}
+
+document.getElementById('btnStartAll').addEventListener('click', () => {
+  connections.forEach((_, bname) => startBoard(bname));
+});
+
+document.getElementById('btnStopAll').addEventListener('click', () => {
+  connections.forEach((_, bname) => stopBoard(bname));
+});
+
+function startTimer(bname){
+  const conn = connections.get(bname);
+
+  conn.timer = setInterval(() => {
+    if(!conn.start) return;
+
+    const t = ((Date.now() - conn.start) / 1000).toFixed(1);
+
+    const el = document.getElementById(`ptimer-${safeId(bname)}`);
+
+    if(el){
+      el.textContent = `${t}s · ${conn.data.length} rows`;
+    }
+  }, 200);
+}
+
+function calcRate(bname){
+  const conn = connections.get(bname);
+  if(!conn) return;
+
+  const now = Date.now();
+
+  conn.rateArr.push(now);
+  conn.rateArr = conn.rateArr.filter(t => t >= now - 2000);
+
+  const el = document.getElementById(`pstat-rate-${safeId(bname)}`);
+
+  if(el){
+    el.textContent = (conn.rateArr.length / 2).toFixed(1);
+  }
+}
+
+function createPanel(bname){
+  const conn = connections.get(bname);
+  const board = conn.board;
+  const sid = safeId(bname);
+  const color = board.color;
+
+  const div = document.createElement('div');
+
+  div.className = 'board-panel';
+  div.id = `panel-${sid}`;
+  div.style.setProperty('--bc', color);
+
+  div.innerHTML = `
+    <div class="panel-header">
+      <div class="panel-dot on" style="background:${color};box-shadow:0 0 8px ${color};"></div>
+      <div class="panel-name" style="color:${color}">${board.label}</div>
+      <div class="panel-badge">${bname}</div>
+
+      <div class="panel-acts">
+        <button class="pbtn start" id="pbtn-start-${sid}" onclick="startBoard('${bname}')">▶ START</button>
+        <button class="pbtn stop" id="pbtn-stop-${sid}" onclick="stopBoard('${bname}')" disabled>■ STOP</button>
+        <button class="pbtn" onclick="disconnectBoard('${bname}')">✕</button>
+      </div>
+    </div>
+
+    <div class="panel-body">
+      <div class="panel-stats">
+        ${['AX','AY','AZ'].map(k=>`
+          <div class="pstat">
+            <div class="pstat-lbl">${k}</div>
+            <div class="pstat-val" id="pstat-${k.toLowerCase()}-${sid}" style="color:${color}">--</div>
+            <div class="pstat-unit">m/s²</div>
+          </div>
+        `).join('')}
+
+        ${['GX','GY','GZ'].map(k=>`
+          <div class="pstat">
+            <div class="pstat-lbl">${k}</div>
+            <div class="pstat-val" id="pstat-${k.toLowerCase()}-${sid}" style="color:#da70d6">--</div>
+            <div class="pstat-unit">rad/s</div>
+          </div>
+        `).join('')}
+
+        <div class="pstat">
+          <div class="pstat-lbl">SPS</div>
+          <div class="pstat-val" id="pstat-rate-${sid}" style="color:#ffd700">--</div>
+          <div class="pstat-unit">rate</div>
+        </div>
+      </div>
+
+      <div class="panel-table">
+        <div class="ptable-hdr">
+          <span>LIVE DATA</span>
+          <span class="ptimer" id="ptimer-${sid}" style="color:${color}">0.0s · 0 rows</span>
+        </div>
+
+        <div class="ptable-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>time_ms</th>
+                <th>ax</th>
+                <th>ay</th>
+                <th>az</th>
+                <th>gx</th>
+                <th>gy</th>
+                <th>gz</th>
+              </tr>
+            </thead>
+            <tbody id="ptbody-${sid}">
+              <tr>
+                <td colspan="7" style="text-align:center;color:var(--dim);padding:14px;font-size:9px;">Waiting…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel-charts">
+        <div class="pchart-box">
+          <div class="pchart-lbl">ACCEL — ax · ay · az</div>
+          <canvas id="pchart-accel-${sid}" height="90"></canvas>
+        </div>
+
+        <div class="pchart-box">
+          <div class="pchart-lbl">GYRO — gx · gy · gz</div>
+          <canvas id="pchart-gyro-${sid}" height="90"></canvas>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('panelsGrid').appendChild(div);
+
+  initPanelCharts(bname, color);
+}
+
+function chartOpts(){
+  return {
     animation:false,
     responsive:true,
     maintainAspectRatio:false,
     plugins:{
-      legend:{labels:{color:'#4a7090',font:{family:'IBM Plex Mono',size:9},boxWidth:10,padding:8}},
-      tooltip:{
-        backgroundColor:'#0c1a2e',borderColor:'#1a3050',borderWidth:1,
-        titleColor:'#00f5c4',bodyColor:'#c8dff0',
-        titleFont:{family:'IBM Plex Mono',size:9},bodyFont:{family:'IBM Plex Mono',size:9},
+      legend:{
+        labels:{
+          color:'#4a7090',
+          font:{family:'IBM Plex Mono',size:8},
+          boxWidth:8,
+          padding:6
+        }
       }
     },
     scales:{
-      x:{ticks:{display:false},grid:{color:'rgba(26,48,80,.45)'},border:{color:'#1a3050'}},
-      y:{ticks:{color:'#4a7090',font:{family:'IBM Plex Mono',size:8}},grid:{color:'rgba(26,48,80,.45)'},border:{color:'#1a3050'}},
+      x:{
+        ticks:{display:false},
+        grid:{color:'rgba(26,48,80,.4)'},
+        border:{color:'#1a3050'}
+      },
+      y:{
+        ticks:{
+          color:'#4a7090',
+          font:{family:'IBM Plex Mono',size:7}
+        },
+        grid:{color:'rgba(26,48,80,.4)'},
+        border:{color:'#1a3050'}
+      }
     }
   };
 }
 
-function emptyDs(){return Array(MAX_PTS).fill(null);}
+function initPanelCharts(bname, color){
+  const conn = connections.get(bname);
+  const sid = safeId(bname);
+  const labels = Array(MAX_PTS).fill('');
+  const blank = () => Array(MAX_PTS).fill(null);
 
-function initCharts(){
-  const labels=Array(MAX_PTS).fill('');
-  accelChart=new Chart(document.getElementById('chartAccel'),{
+  conn.accelChart = new Chart(document.getElementById(`pchart-accel-${sid}`), {
     type:'line',
-    data:{labels,datasets:[
-      {label:'ax',data:emptyDs(),borderColor:'#00f5c4',borderWidth:1.5,pointRadius:0,tension:.3},
-      {label:'ay',data:emptyDs(),borderColor:'#00aaff',borderWidth:1.5,pointRadius:0,tension:.3},
-      {label:'az',data:emptyDs(),borderColor:'#ff4466',borderWidth:1.5,pointRadius:0,tension:.3},
-    ]},
-    options:makeChartOpts(),
+    data:{
+      labels,
+      datasets:[
+        {label:'ax',data:blank(),borderColor:color,borderWidth:1.4,pointRadius:0,tension:.3},
+        {label:'ay',data:blank(),borderColor:'#00aaff',borderWidth:1.4,pointRadius:0,tension:.3},
+        {label:'az',data:blank(),borderColor:'#ff4466',borderWidth:1.4,pointRadius:0,tension:.3},
+      ]
+    },
+    options:chartOpts()
   });
-  gyroChart=new Chart(document.getElementById('chartGyro'),{
+
+  conn.gyroChart = new Chart(document.getElementById(`pchart-gyro-${sid}`), {
     type:'line',
-    data:{labels,datasets:[
-      {label:'gx',data:emptyDs(),borderColor:'#ffd700',borderWidth:1.5,pointRadius:0,tension:.3},
-      {label:'gy',data:emptyDs(),borderColor:'#ff8c00',borderWidth:1.5,pointRadius:0,tension:.3},
-      {label:'gz',data:emptyDs(),borderColor:'#da70d6',borderWidth:1.5,pointRadius:0,tension:.3},
-    ]},
-    options:makeChartOpts(),
+    data:{
+      labels,
+      datasets:[
+        {label:'gx',data:blank(),borderColor:'#ffd700',borderWidth:1.4,pointRadius:0,tension:.3},
+        {label:'gy',data:blank(),borderColor:'#ff8c00',borderWidth:1.4,pointRadius:0,tension:.3},
+        {label:'gz',data:blank(),borderColor:'#da70d6',borderWidth:1.4,pointRadius:0,tension:.3},
+      ]
+    },
+    options:chartOpts()
   });
 }
 
-function pushCharts(r){
-  const add=(ch,vals)=>{
-    ch.data.datasets.forEach((ds,i)=>{ds.data.push(vals[i]);if(ds.data.length>MAX_PTS)ds.data.shift();});
-    ch.data.labels.push('');
-    if(ch.data.labels.length>MAX_PTS)ch.data.labels.shift();
-    ch.update('none');
+function pushPanelCharts(bname, r){
+  const conn = connections.get(bname);
+  if(!conn?.accelChart) return;
+
+  const push = (chart, values) => {
+    chart.data.datasets.forEach((ds, i) => {
+      ds.data.push(values[i]);
+
+      if(ds.data.length > MAX_PTS){
+        ds.data.shift();
+      }
+    });
+
+    chart.data.labels.push('');
+
+    if(chart.data.labels.length > MAX_PTS){
+      chart.data.labels.shift();
+    }
+
+    chart.update('none');
   };
-  add(accelChart,[r.ax,r.ay,r.az]);
-  add(gyroChart,[r.gx,r.gy,r.gz]);
+
+  push(conn.accelChart, [r.ax, r.ay, r.az]);
+  push(conn.gyroChart, [r.gx, r.gy, r.gz]);
 }
 
-function resetCharts(){
-  [accelChart,gyroChart].forEach(c=>{
-    c.data.datasets.forEach(ds=>ds.data=emptyDs());
-    c.data.labels=Array(MAX_PTS).fill('');
-    c.update('none');
+function resetPanelCharts(bname){
+  const conn = connections.get(bname);
+
+  [conn.accelChart, conn.gyroChart].forEach(chart => {
+    if(!chart) return;
+
+    chart.data.datasets.forEach(ds => ds.data = Array(MAX_PTS).fill(null));
+    chart.data.labels = Array(MAX_PTS).fill('');
+    chart.update('none');
   });
 }
 
-// ══════════════════════════════════════════════════════════════
-//  START / STOP
-// ══════════════════════════════════════════════════════════════
-const enc=new TextEncoder();
+function updatePanelLive(bname, r){
+  const sid = safeId(bname);
 
-document.getElementById('btnStart').addEventListener('click',async()=>{
-  if(!isConnected||!rxChar) return;
-  sessionData=[];nusBuf='';rateArr=[];
-  resetCharts();
-  document.getElementById('statAx').textContent='--';
-  document.getElementById('statAy').textContent='--';
-  document.getElementById('statAz').textContent='--';
-  document.getElementById('statGx').textContent='--';
-  document.getElementById('statGy').textContent='--';
-  document.getElementById('statGz').textContent='--';
-  document.getElementById('statRate').textContent='--';
-  document.getElementById('rowsDisplay').textContent='0 rows';
-  document.getElementById('tbody').innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:22px;font-size:10px;letter-spacing:.1em">Waiting for data…</td></tr>`;
-  await rxChar.writeValue(enc.encode('START'));
-  isStreaming=true;
-  sessionStart=Date.now();
-  startTimer();
-  document.getElementById('btnStart').disabled=true;
-  document.getElementById('btnStop').disabled=false;
-  toast('Streaming started','ok');
-});
+  setText(`pstat-ax-${sid}`, r.ax.toFixed(3));
+  setText(`pstat-ay-${sid}`, r.ay.toFixed(3));
+  setText(`pstat-az-${sid}`, r.az.toFixed(3));
 
-document.getElementById('btnStop').addEventListener('click',async()=>{
-  if(!isStreaming) return;
-  if(rxChar) await rxChar.writeValue(enc.encode('STOP'));
-  isStreaming=false;
-  stopTimer();
-  document.getElementById('btnStart').disabled=false;
-  document.getElementById('btnStop').disabled=true;
-  const elapsed=sessionStart?((Date.now()-sessionStart)/1000).toFixed(1):'0.0';
-  document.getElementById('modalMeta').textContent=`${sessionData.length} samples · ${elapsed}s`;
-  document.getElementById('overlay').classList.add('active');
-});
+  setText(`pstat-gx-${sid}`, r.gx.toFixed(4));
+  setText(`pstat-gy-${sid}`, r.gy.toFixed(4));
+  setText(`pstat-gz-${sid}`, r.gz.toFixed(4));
 
-function startTimer(){
-  timerInt=setInterval(()=>{
-    if(!sessionStart) return;
-    document.getElementById('timerDisplay').textContent=`${((Date.now()-sessionStart)/1000).toFixed(1)}s`;
-  },100);
+  const tbody = document.getElementById(`ptbody-${sid}`);
+  if(!tbody) return;
+
+  if(tbody.children.length === 1 && tbody.children[0].children[0]?.colSpan === 7){
+    tbody.innerHTML = '';
+  }
+
+  const tr = document.createElement('tr');
+
+  tr.innerHTML = `
+    <td>${r.time_ms}</td>
+    <td>${r.ax.toFixed(4)}</td>
+    <td>${r.ay.toFixed(4)}</td>
+    <td>${r.az.toFixed(4)}</td>
+    <td>${r.gx.toFixed(4)}</td>
+    <td>${r.gy.toFixed(4)}</td>
+    <td>${r.gz.toFixed(4)}</td>
+  `;
+
+  tbody.appendChild(tr);
+
+  while(tbody.children.length > 40){
+    tbody.removeChild(tbody.firstChild);
+  }
 }
-function stopTimer(){clearInterval(timerInt);}
 
-// ══════════════════════════════════════════════════════════════
-//  MODAL ACTIONS
-// ══════════════════════════════════════════════════════════════
-document.getElementById('btnSaveDrive').addEventListener('click',saveToDrive);
-document.getElementById('btnSaveLocal').addEventListener('click',saveLocal);
-document.getElementById('btnDiscard').addEventListener('click',()=>{
+function clearPanelTable(bname){
+  const tbody = document.getElementById(`ptbody-${safeId(bname)}`);
+
+  if(tbody){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;color:var(--dim);padding:14px;font-size:9px;">Waiting…</td>
+      </tr>
+    `;
+  }
+}
+
+function updateSidebar(){
+  const list = document.getElementById('sideboardList');
+
+  if(connections.size === 0){
+    list.innerHTML = '<div style="font-size:9px;color:var(--dim);letter-spacing:.08em;">No boards connected</div>';
+    return;
+  }
+
+  list.innerHTML = [...connections.entries()].map(([bname, conn]) => `
+    <div class="board-slot active" style="--slot-color:${conn.board.color};">
+      <div class="slot-header">
+        <div class="slot-dot on"></div>
+        <div class="slot-name">${conn.board.label}</div>
+        <button class="slot-disc" onclick="disconnectBoard('${bname}')" title="Disconnect">✕</button>
+      </div>
+      <div class="slot-stats">
+        <span>${bname}</span>
+        <span><b>${conn.data.length}</b> rows</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateGlobalButtons(){
+  const has = connections.size > 0;
+
+  document.getElementById('btnStartAll').disabled = !has;
+  document.getElementById('btnStopAll').disabled = !has;
+}
+
+function updateNoBoardsMsg(){
+  const hasBoards = connections.size > 0;
+
+  document.getElementById('noBoardsMsg').style.display = hasBoards ? 'none' : 'flex';
+  document.getElementById('boardCount').textContent = connections.size;
+}
+
+document.getElementById('btnSaveDrive').addEventListener('click', () => {
+  if(pendingSave){
+    saveSession(pendingSave.bname, 'drive');
+  }
+});
+
+document.getElementById('btnSaveLocal').addEventListener('click', () => {
+  if(pendingSave){
+    saveSession(pendingSave.bname, 'local');
+  }
+});
+
+document.getElementById('btnDiscard').addEventListener('click', () => {
   document.getElementById('overlay').classList.remove('active');
+  pendingSave = null;
   toast('Session discarded');
 });
 
-function csvContent(){
-  const hdr='sample,time_ms,ax,ay,az,gx,gy,gz\n';
-  return hdr+sessionData.map(r=>`${r.sample},${r.time_ms},${r.ax},${r.ay},${r.az},${r.gx},${r.gy},${r.gz}`).join('\n');
+function csvOf(bname){
+  const conn = connections.get(bname);
+  if(!conn) return '';
+
+  return 'sample,time_ms,ax,ay,az,gx,gy,gz\n' +
+    conn.data.map(r =>
+      `${r.sample},${r.time_ms},${r.ax},${r.ay},${r.az},${r.gx},${r.gy},${r.gz}`
+    ).join('\n');
 }
 
-function filename(){
-  const lbl=document.getElementById('testLabel').value||'test';
-  const whl=document.getElementById('wheelPos').value;
-  const ts=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
-  return `${lbl}_${whl}_${ts}.csv`;
+function filenameOf(bname){
+  const conn = connections.get(bname);
+
+  const label = document.getElementById('testLabel').value || 'test';
+  const wheel = document.getElementById('wheelPos').value;
+  const board = (conn?.board?.label || bname).replace(/\s+/g, '_');
+  const ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+
+  return `${label}_${wheel}_${board}_${ts}.csv`;
 }
 
-function saveLocal(){
-  const fn=filename(), csv=csvContent();
-  const a=Object.assign(document.createElement('a'),{
-    href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),
-    download:fn,
-  });
-  a.click();
-  URL.revokeObjectURL(a.href);
-  storeHistory(fn,sessionData.length,false);
-  document.getElementById('overlay').classList.remove('active');
-  toast('CSV downloaded!','ok');
-}
+async function saveSession(bname, method){
+  const conn = connections.get(bname);
 
-// ══════════════════════════════════════════════════════════════
-//  SAVE TO DRIVE via Google Apps Script
-//  No OAuth popup needed — script runs server-side as the owner.
-//  Works from ANY network (WiFi, mobile data, corporate LAN)
-//  as long as the device has internet access.
-// ══════════════════════════════════════════════════════════════
-async function saveToDrive(){
-  const fn  = filename();
-  const csv = csvContent();
-  const btn = document.getElementById('btnSaveDrive');
+  if(!conn){
+    toast('Board not found', 'err');
+    return;
+  }
 
-  btn.disabled    = true;
-  btn.textContent = '↗ Uploading…';
-  toast('Uploading to Drive…');
+  const fn = filenameOf(bname);
+  const csv = csvOf(bname);
 
-  try {
-    // ✅ Standard fetch — NO mode:'no-cors'
-    // Apps Script deployed as "Anyone" automatically adds CORS headers.
-    const response = await fetch(APPS_SCRIPT_URL, {
-      method : 'POST',
-      headers: { 'Content-Type': 'text/plain' },   // text/plain avoids CORS preflight
-      body   : JSON.stringify({ csv: csv, filename: fn }),
+  if(method === 'local'){
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(new Blob([csv], {type:'text/csv'})),
+      download: fn
     });
 
-    if (!response.ok) {
-      const txt = await response.text().catch(()=>'');
-      throw new Error(`Server error ${response.status}: ${txt}`);
-    }
+    a.click();
+    URL.revokeObjectURL(a.href);
 
-    const result = await response.json();
+    storeHistory(fn, conn.data.length, false, conn.board.label, csv);
 
-    if (result.status !== 'ok') {
-      throw new Error(result.message || 'Unknown error from Apps Script');
-    }
-
-    storeHistory(fn, sessionData.length, true);
     document.getElementById('overlay').classList.remove('active');
-    toast(`✓ Saved to Drive: ${fn}`, 'ok');
+    pendingSave = null;
 
-  } catch(e) {
-    console.error('Drive upload error:', e);
-    // Friendly hints for common failures
-    let hint = e.message;
-    if(hint.includes('Failed to fetch')){
-      hint = 'Network error — check internet connection';
-    } else if(hint.includes('CORS')){
-      hint = 'Apps Script not deployed as "Anyone" — see Guide tab';
+    toast('CSV downloaded', 'ok');
+    return;
+  }
+
+  const btn = document.getElementById('btnSaveDrive');
+
+  btn.disabled = true;
+  btn.textContent = '↗ Uploading…';
+
+  toast('Uploading to Drive…');
+
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        csv,
+        filename: fn
+      })
+    });
+
+    if(!res.ok){
+      throw new Error(`HTTP ${res.status}`);
     }
-    toast(`Drive upload failed: ${hint}`, 'err');
-  } finally {
-    btn.disabled    = false;
+
+    const result = await res.json();
+
+    if(result.status !== 'ok' && result.ok !== true){
+      throw new Error(result.message || 'Apps Script error');
+    }
+
+    storeHistory(fn, conn.data.length, true, conn.board.label, csv);
+
+    document.getElementById('overlay').classList.remove('active');
+    pendingSave = null;
+
+    toast(`Saved to Drive: ${fn}`, 'ok');
+
+  }catch(e){
+    toast(`Drive upload failed: ${e.message}`, 'err');
+  }finally{
+    btn.disabled = false;
     btn.textContent = '↗ Save to Drive';
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-//  HISTORY
-// ══════════════════════════════════════════════════════════════
-function storeHistory(fn,rows,onDrive){
-  const h=JSON.parse(localStorage.getItem('mpu_hist')||'[]');
-  const board = BOARDS[connectedBoardName];
-  h.unshift({fn,rows,onDrive,ts:new Date().toISOString(),csv:csvContent(),board:board?board.label:connectedBoardName||'unknown'});
-  if(h.length>60) h.pop();
-  localStorage.setItem('mpu_hist',JSON.stringify(h));
+function storeHistory(fn, rows, onDrive, boardLabel, csv){
+  const h = JSON.parse(localStorage.getItem('mpu_hist_multi') || '[]');
+
+  h.unshift({
+    fn,
+    rows,
+    onDrive,
+    boardLabel,
+    ts: new Date().toISOString(),
+    csv
+  });
+
+  if(h.length > 100){
+    h.pop();
+  }
+
+  localStorage.setItem('mpu_hist_multi', JSON.stringify(h));
 }
 
 function renderHistory(){
-  const h=JSON.parse(localStorage.getItem('mpu_hist')||'[]');
-  const c=document.getElementById('histList');
-  if(!h.length){c.innerHTML='<div class="h-empty">No sessions saved yet.</div>';return;}
-  c.innerHTML=h.map((s,i)=>`
+  const h = JSON.parse(localStorage.getItem('mpu_hist_multi') || '[]');
+  const c = document.getElementById('histList');
+
+  if(!h.length){
+    c.innerHTML = '<div class="h-empty">No sessions saved yet.</div>';
+    return;
+  }
+
+  c.innerHTML = h.map((s, i) => `
     <div class="sess">
       <div class="sess-info">
         <div class="sess-name">${s.fn}</div>
         <div class="sess-meta">
           ${s.rows} rows · ${new Date(s.ts).toLocaleString()}
-          ${s.board?`&nbsp;·&nbsp;<span style="color:var(--accent2)">${s.board}</span>`:''}
-          ${s.onDrive?'&nbsp;·&nbsp;<span style="color:var(--green)">↗ Drive</span>':''}
+          ${s.boardLabel ? ` · <span style="color:var(--accent2)">${s.boardLabel}</span>` : ''}
+          ${s.onDrive ? ' · <span style="color:var(--green)">Drive</span>' : ''}
         </div>
       </div>
       <div class="sess-acts">
@@ -1021,26 +1735,41 @@ function renderHistory(){
 }
 
 function dlHist(i){
-  const s=JSON.parse(localStorage.getItem('mpu_hist')||'[]')[i];
-  const a=Object.assign(document.createElement('a'),{
-    href:URL.createObjectURL(new Blob([s.csv],{type:'text/csv'})),
-    download:s.fn,
+  const h = JSON.parse(localStorage.getItem('mpu_hist_multi') || '[]');
+  const s = h[i];
+
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([s.csv], {type:'text/csv'})),
+    download: s.fn
   });
-  a.click();URL.revokeObjectURL(a.href);
+
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function delHist(i){
-  const h=JSON.parse(localStorage.getItem('mpu_hist')||'[]');
-  h.splice(i,1);
-  localStorage.setItem('mpu_hist',JSON.stringify(h));
+  const h = JSON.parse(localStorage.getItem('mpu_hist_multi') || '[]');
+
+  h.splice(i, 1);
+
+  localStorage.setItem('mpu_hist_multi', JSON.stringify(h));
   renderHistory();
 }
 
-// ══════════════════════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════════════════════
-initCharts();
+function setText(id, value){
+  const el = document.getElementById(id);
+  if(el){
+    el.textContent = value;
+  }
+}
+
+function safeId(name){
+  return String(name).replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
 renderHistory();
+updateNoBoardsMsg();
+updateGlobalButtons();
 </script>
 </body>
 </html>
