@@ -601,7 +601,17 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSjGOEr7MI0JvO
 const NUS_SVC = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 const NUS_TX  = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // notify → web
 const NUS_RX  = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // write  → device
-const BLE_NAME = 'mpu6050 data';
+// ── Supported boards ──────────────────────────────────────────
+// Add more entries here any time you add a new board.
+// key   = exact BLE advertised name (set in prj.conf)
+// label = friendly label shown in the UI header
+const BOARDS = {
+  'nrf33' : { label: 'nRF52833 DK', color: '#00f5c4' },
+  'nrf40' : { label: 'nRF52840 DK', color: '#00aaff' },
+};
+// Legacy name kept so old firmware still works
+const BLE_NAMES = [...Object.keys(BOARDS)];
+let connectedBoardName = ''; // set when device connects
 
 // ══════════════════════════════════════════════════════════════
 //  STATE
@@ -656,10 +666,17 @@ async function connectBLE(){
     return;
   }
   try{
+    // Build filters array — one entry per supported board name
+    const filters = BLE_NAMES.map(n=>({name:n}));
+
     bleDevice=await navigator.bluetooth.requestDevice({
-      filters:[{name:BLE_NAME}],
+      filters,
       optionalServices:[NUS_SVC],
     });
+
+    // Remember which board connected
+    connectedBoardName = bleDevice.name || '';
+
     bleDevice.addEventListener('gattserverdisconnected',onDisconn);
     const server=await bleDevice.gatt.connect();
     const svc=await server.getPrimaryService(NUS_SVC);
@@ -669,7 +686,8 @@ async function connectBLE(){
     txChar.addEventListener('characteristicvaluechanged',onNUS);
     isConnected=true;
     setBLEUI(true);
-    toast('BLE connected!','ok');
+    const board = BOARDS[connectedBoardName];
+    toast(`Connected: ${board ? board.label : connectedBoardName}`, 'ok');
   }catch(e){
     toast(`BLE: ${e.message}`,'err');
   }
@@ -683,8 +701,24 @@ function onDisconn(){
 }
 
 function setBLEUI(on){
-  document.getElementById('bleDot').classList.toggle('on',on);
-  document.getElementById('bleText').textContent=on?BLE_NAME.toUpperCase():'NOT CONNECTED';
+  const dot  = document.getElementById('bleDot');
+  const txt  = document.getElementById('bleText');
+  dot.classList.toggle('on', on);
+  if(on){
+    const board = BOARDS[connectedBoardName];
+    const label = board ? board.label : connectedBoardName;
+    const color = board ? board.color : '#00f5c4';
+    txt.textContent = label.toUpperCase();
+    txt.style.color = color;
+    dot.style.background = color;
+    dot.style.boxShadow  = `0 0 8px ${color}`;
+  } else {
+    txt.textContent = 'NOT CONNECTED';
+    txt.style.color = '';
+    dot.style.background = '';
+    dot.style.boxShadow  = '';
+    connectedBoardName = '';
+  }
   document.getElementById('btnConnect').disabled=on;
   document.getElementById('btnDisconnect').disabled=!on;
   document.getElementById('btnStart').disabled=!on;
@@ -958,7 +992,8 @@ async function saveToDrive(){
 // ══════════════════════════════════════════════════════════════
 function storeHistory(fn,rows,onDrive){
   const h=JSON.parse(localStorage.getItem('mpu_hist')||'[]');
-  h.unshift({fn,rows,onDrive,ts:new Date().toISOString(),csv:csvContent()});
+  const board = BOARDS[connectedBoardName];
+  h.unshift({fn,rows,onDrive,ts:new Date().toISOString(),csv:csvContent(),board:board?board.label:connectedBoardName||'unknown'});
   if(h.length>60) h.pop();
   localStorage.setItem('mpu_hist',JSON.stringify(h));
 }
@@ -973,6 +1008,7 @@ function renderHistory(){
         <div class="sess-name">${s.fn}</div>
         <div class="sess-meta">
           ${s.rows} rows · ${new Date(s.ts).toLocaleString()}
+          ${s.board?`&nbsp;·&nbsp;<span style="color:var(--accent2)">${s.board}</span>`:''}
           ${s.onDrive?'&nbsp;·&nbsp;<span style="color:var(--green)">↗ Drive</span>':''}
         </div>
       </div>
