@@ -414,7 +414,9 @@ tr:hover td{background:rgba(0,245,196,.025);}
 
     <!-- LIVE -->
     <div class="tcont active" id="tab-live">
-      <div class="stat-grid">
+
+      <!-- ROW 1: Accel cards -->
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:8px;">
         <div class="stat-card">
           <div class="slabel">AX</div>
           <div class="sval" id="statAx">--</div>
@@ -433,23 +435,32 @@ tr:hover td{background:rgba(0,245,196,.025);}
         <div class="stat-card">
           <div class="slabel">RATE</div>
           <div class="sval" id="statRate">--</div>
-          <div class="sunit">sps</div>
+          <div class="sunit">samples/sec</div>
         </div>
       </div>
 
-      <div class="chart-grid">
-        <div class="chart-box">
-          <div class="chart-title">ACCELEROMETER — ax · ay · az</div>
-          <canvas id="chartAccel" height="110"></canvas>
+      <!-- ROW 2: Gyro cards -->
+      <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px;">
+        <div class="stat-card" style="border-color:#2a1a40;">
+          <div class="slabel" style="color:#9a60aa;">GX</div>
+          <div class="sval" id="statGx" style="color:#da70d6;">--</div>
+          <div class="sunit">rad/s</div>
         </div>
-        <div class="chart-box">
-          <div class="chart-title">GYROSCOPE — gx · gy · gz</div>
-          <canvas id="chartGyro" height="110"></canvas>
+        <div class="stat-card" style="border-color:#2a1a40;">
+          <div class="slabel" style="color:#9a60aa;">GY</div>
+          <div class="sval" id="statGy" style="color:#da70d6;">--</div>
+          <div class="sunit">rad/s</div>
+        </div>
+        <div class="stat-card" style="border-color:#2a1a40;">
+          <div class="slabel" style="color:#9a60aa;">GZ</div>
+          <div class="sval" id="statGz" style="color:#da70d6;">--</div>
+          <div class="sunit">rad/s</div>
         </div>
       </div>
 
-      <div class="tbox">
-        <div class="tbox-hdr">LATEST ROWS</div>
+      <!-- TABLE FIRST (as requested) -->
+      <div class="tbox" style="margin-bottom:18px;">
+        <div class="tbox-hdr">LATEST ROWS — live feed</div>
         <div class="tscroll">
           <table>
             <thead>
@@ -466,6 +477,18 @@ tr:hover td{background:rgba(0,245,196,.025);}
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- CHARTS BELOW -->
+      <div class="chart-grid">
+        <div class="chart-box">
+          <div class="chart-title">ACCELEROMETER — ax · ay · az (m/s²)</div>
+          <canvas id="chartAccel" height="110"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">GYROSCOPE — gx · gy · gz (rad/s)</div>
+          <canvas id="chartGyro" height="110"></canvas>
         </div>
       </div>
     </div>
@@ -705,6 +728,9 @@ function updateLive(r){
   document.getElementById('statAx').textContent=r.ax.toFixed(3);
   document.getElementById('statAy').textContent=r.ay.toFixed(3);
   document.getElementById('statAz').textContent=r.az.toFixed(3);
+  document.getElementById('statGx').textContent=r.gx.toFixed(4);
+  document.getElementById('statGy').textContent=r.gy.toFixed(4);
+  document.getElementById('statGz').textContent=r.gz.toFixed(4);
   document.getElementById('rowsDisplay').textContent=`${sessionData.length} rows`;
 
   const tbody=document.getElementById('tbody');
@@ -802,6 +828,9 @@ document.getElementById('btnStart').addEventListener('click',async()=>{
   document.getElementById('statAx').textContent='--';
   document.getElementById('statAy').textContent='--';
   document.getElementById('statAz').textContent='--';
+  document.getElementById('statGx').textContent='--';
+  document.getElementById('statGy').textContent='--';
+  document.getElementById('statGz').textContent='--';
   document.getElementById('statRate').textContent='--';
   document.getElementById('rowsDisplay').textContent='0 rows';
   document.getElementById('tbody').innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:22px;font-size:10px;letter-spacing:.1em">Waiting for data…</td></tr>`;
@@ -889,7 +918,7 @@ async function saveToDrive(){
     // Apps Script deployed as "Anyone" automatically adds CORS headers.
     const response = await fetch(APPS_SCRIPT_URL, {
       method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },   // text/plain avoids CORS preflight
       body   : JSON.stringify({ csv: csv, filename: fn }),
     });
 
