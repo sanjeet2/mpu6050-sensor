@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MPU6050 Multi Board BLE Logger</title>
+<title>MPU6050 · Multi-Board BLE Logger</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -77,12 +77,6 @@ header{
 .logo span{
   color:var(--dim);
   margin:0 8px;
-}
-
-.hdr-right{
-  display:flex;
-  align-items:center;
-  gap:18px;
 }
 
 .board-count{
@@ -160,10 +154,6 @@ header{
   color:var(--accent2);
 }
 
-.btn-add:hover{
-  background:rgba(0,170,255,.08);
-}
-
 .btn-start{
   border-color:var(--accent);
   color:var(--accent);
@@ -179,13 +169,19 @@ header{
   border:1px solid var(--border);
   border-radius:8px;
   padding:10px 12px;
-  transition:border-color .2s;
+  transition:all .2s;
   position:relative;
   margin-bottom:7px;
+  cursor:pointer;
 }
 
 .board-slot.active{
   border-color:var(--slot-color,var(--accent));
+}
+
+.board-slot.selected{
+  background:rgba(0,245,196,.08);
+  box-shadow:0 0 0 1px var(--slot-color,var(--accent));
 }
 
 .slot-header{
@@ -199,13 +195,9 @@ header{
   width:7px;
   height:7px;
   border-radius:50%;
-  background:var(--dim);
-  flex-shrink:0;
-}
-
-.slot-dot.on{
   background:var(--slot-color,var(--accent));
   box-shadow:0 0 6px var(--slot-color,var(--accent));
+  flex-shrink:0;
   animation:blink 2s infinite;
 }
 
@@ -229,7 +221,6 @@ header{
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:all .15s;
 }
 
 .slot-disc:hover{
@@ -246,7 +237,6 @@ header{
 
 .slot-stats b{
   color:var(--slot-color,var(--accent));
-  font-weight:500;
 }
 
 .drive-row{
@@ -262,10 +252,6 @@ header{
   width:5px;
   height:5px;
   border-radius:50%;
-  background:var(--dim);
-}
-
-.drive-dot.on{
   background:var(--green);
 }
 
@@ -290,11 +276,6 @@ header{
   color:var(--dim);
   cursor:pointer;
   border-bottom:2px solid transparent;
-  transition:all .18s;
-}
-
-.tab:hover{
-  color:var(--text);
 }
 
 .tab.active{
@@ -354,7 +335,6 @@ header{
   border-radius:12px;
   overflow:hidden;
   --bc:var(--accent);
-  transition:border-color .2s;
 }
 
 .board-panel:hover{
@@ -374,13 +354,9 @@ header{
   width:8px;
   height:8px;
   border-radius:50%;
-  background:var(--dim);
-  flex-shrink:0;
-}
-
-.panel-dot.on{
   background:var(--bc);
   box-shadow:0 0 8px var(--bc);
+  flex-shrink:0;
   animation:blink 2s infinite;
 }
 
@@ -393,7 +369,6 @@ header{
   font-family:var(--font-d);
   font-size:11px;
   letter-spacing:.16em;
-  color:var(--text);
   flex:1;
 }
 
@@ -422,7 +397,6 @@ header{
   font-family:var(--font-m);
   cursor:pointer;
   letter-spacing:.08em;
-  transition:all .15s;
 }
 
 .pbtn.start{
@@ -435,8 +409,9 @@ header{
   color:var(--warn);
 }
 
-.pbtn:hover{
-  background:rgba(0,245,196,.08);
+.pbtn.save{
+  border-color:var(--green);
+  color:var(--green);
 }
 
 .pbtn:disabled{
@@ -474,7 +449,6 @@ header{
 .pstat-val{
   font-family:var(--font-d);
   font-size:11px;
-  letter-spacing:.02em;
 }
 
 .pstat-unit{
@@ -505,7 +479,6 @@ header{
 .ptimer{
   font-family:var(--font-d);
   font-size:11px;
-  color:var(--bc,var(--accent));
 }
 
 .ptable-scroll{
@@ -534,10 +507,6 @@ td{
   font-size:9px;
   color:var(--text);
   border-bottom:1px solid rgba(26,48,80,.3);
-}
-
-tr:hover td{
-  background:rgba(0,245,196,.02);
 }
 
 .panel-charts{
@@ -577,15 +546,6 @@ tr:hover td{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  transition:border-color .2s;
-}
-
-.sess:hover{
-  border-color:var(--accent);
-}
-
-.sess-info{
-  flex:1;
 }
 
 .sess-name{
@@ -614,8 +574,6 @@ tr:hover td{
   color:var(--dim);
   font-family:var(--font-m);
   cursor:pointer;
-  letter-spacing:.07em;
-  transition:all .15s;
 }
 
 .btn-xs:hover{
@@ -640,14 +598,9 @@ tr:hover td{
   margin:26px 0 10px;
 }
 
-.guide h2:first-child{
-  margin-top:0;
-}
-
 .guide p,
 .guide li{
   font-size:11px;
-  color:var(--text);
   line-height:1.85;
   margin-bottom:6px;
 }
@@ -655,7 +608,6 @@ tr:hover td{
 .guide ol,
 .guide ul{
   margin-left:18px;
-  margin-bottom:8px;
 }
 
 .code{
@@ -663,7 +615,6 @@ tr:hover td{
   border:1px solid var(--border);
   border-radius:4px;
   padding:1px 7px;
-  font-family:var(--font-m);
   font-size:10px;
   color:var(--accent);
 }
@@ -674,20 +625,10 @@ tr:hover td{
   margin:10px 0;
 }
 
-.board-table th{
-  padding:7px 10px;
-  font-size:9px;
-  letter-spacing:.12em;
-  color:var(--dim);
-  text-align:left;
-  background:var(--bg3);
-  border:1px solid var(--border);
-}
-
+.board-table th,
 .board-table td{
   padding:7px 10px;
   font-size:10px;
-  color:var(--text);
   border:1px solid var(--border);
 }
 
@@ -711,14 +652,8 @@ tr:hover td{
   border:1px solid var(--border);
   border-radius:14px;
   padding:28px;
-  width:450px;
+  width:460px;
   max-width:95vw;
-  animation:mIn .22s ease;
-}
-
-@keyframes mIn{
-  from{transform:scale(.96) translateY(8px);opacity:0}
-  to{transform:scale(1) translateY(0);opacity:1}
 }
 
 .modal-title{
@@ -759,17 +694,6 @@ tr:hover td{
   color:var(--text);
   font-family:var(--font-m);
   font-size:12px;
-  outline:none;
-  transition:border-color .18s;
-}
-
-.finput:focus,
-.fselect:focus{
-  border-color:var(--accent);
-}
-
-.fselect{
-  cursor:pointer;
 }
 
 .macts{
@@ -789,7 +713,6 @@ tr:hover td{
   letter-spacing:.1em;
   cursor:pointer;
   border:1px solid;
-  transition:all .15s;
 }
 
 .mbtn-drive{
@@ -808,7 +731,7 @@ tr:hover td{
   background:transparent;
   border-color:var(--border);
   color:var(--dim);
-  flex:.4;
+  flex:.45;
 }
 
 .toasts{
@@ -827,10 +750,8 @@ tr:hover td{
   border-radius:8px;
   padding:10px 14px;
   font-size:10px;
-  letter-spacing:.06em;
   color:var(--text);
-  animation:tIn .28s ease;
-  max-width:280px;
+  max-width:320px;
 }
 
 .toast.ok{
@@ -841,11 +762,6 @@ tr:hover td{
 .toast.err{
   border-color:var(--warn);
   color:var(--warn);
-}
-
-@keyframes tIn{
-  from{transform:translateX(16px);opacity:0}
-  to{transform:translateX(0);opacity:1}
 }
 
 ::-webkit-scrollbar{
@@ -868,9 +784,7 @@ tr:hover td{
 
 <header>
   <div class="logo">MPU6050 <span>·</span> MULTI-BOARD LOGGER</div>
-  <div class="hdr-right">
-    <div class="board-count">BOARDS CONNECTED: <span id="boardCount">0</span></div>
-  </div>
+  <div class="board-count">BOARDS CONNECTED: <span id="boardCount">0</span></div>
 </header>
 
 <div class="layout">
@@ -880,7 +794,7 @@ tr:hover td{
     <div>
       <div class="sec-label">ADD BOARD</div>
       <button class="btn btn-add" id="btnAddBoard">＋ Connect Board</button>
-      <p style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.7;letter-spacing:.05em;">
+      <p style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.7;">
         Click once for each board. Each board gets its own panel.
       </p>
     </div>
@@ -894,9 +808,9 @@ tr:hover td{
 
     <div>
       <div class="sec-label">GOOGLE DRIVE</div>
-      <div class="drive-row" style="margin-top:0;margin-bottom:4px;">
-        <div class="drive-dot on"></div>
-        <span style="color:var(--green);font-size:9px;letter-spacing:.1em;">Ready via Apps Script</span>
+      <div class="drive-row">
+        <div class="drive-dot"></div>
+        <span style="color:var(--green);font-size:9px;">Ready via Apps Script</span>
       </div>
       <div style="font-size:9px;color:var(--dim);line-height:1.6;margin-top:4px;">
         Folder: <span style="color:var(--text)">MPU6050 Data</span>
@@ -938,40 +852,27 @@ tr:hover td{
 
     <div class="tcont" id="tab-guide">
       <div class="guide">
-        <h2>MULTI-BOARD ARCHITECTURE</h2>
-        <p>Each Nordic board works as a BLE peripheral. The laptop/phone browser works as the BLE central. Click Connect Board once per module.</p>
-
-        <h2>FIRMWARE NAME SETTING</h2>
-        <p>Each physical board needs a unique BLE name in <span class="code">prj.conf</span>.</p>
+        <h2>MULTI-BOARD SETUP</h2>
+        <p>Each board must have a unique BLE name in <span class="code">prj.conf</span>.</p>
 
         <table class="board-table">
-          <tr><th>Board</th><th>prj.conf</th><th>Website name</th></tr>
-          <tr><td>nRF52833 DK</td><td><span class="code">CONFIG_BT_DEVICE_NAME="nrf33"</span></td><td>nrf33</td></tr>
-          <tr><td>nRF52840 DK</td><td><span class="code">CONFIG_BT_DEVICE_NAME="nrf40"</span></td><td>nrf40</td></tr>
+          <tr><th>Board</th><th>BLE name</th></tr>
+          <tr><td>nRF52833 DK</td><td><span class="code">CONFIG_BT_DEVICE_NAME="nrf33"</span></td></tr>
+          <tr><td>nRF52840 DK</td><td><span class="code">CONFIG_BT_DEVICE_NAME="nrf40"</span></td></tr>
         </table>
 
-        <h2>CONNECTING BOTH BOARDS</h2>
+        <h2>HOW TO USE</h2>
         <ol>
-          <li>Flash nRF52833 with BLE name <span class="code">nrf33</span>.</li>
-          <li>Flash nRF52840 with BLE name <span class="code">nrf40</span>.</li>
-          <li>Open this website in Chrome or Edge.</li>
-          <li>Click <span class="code">Connect Board</span> and select <span class="code">nrf33</span>.</li>
-          <li>Click <span class="code">Connect Board</span> again and select <span class="code">nrf40</span>.</li>
-          <li>Use <span class="code">Start All</span> to start both.</li>
+          <li>Click Connect Board and connect <span class="code">nrf33</span>.</li>
+          <li>Click Connect Board again and connect <span class="code">nrf40</span>.</li>
+          <li>Click Start All to start both.</li>
+          <li>Click Stop All to stop both.</li>
+          <li>Save popup will come one-by-one for each board.</li>
         </ol>
 
-        <h2>SCALING TO 10 BOARDS</h2>
-        <p>Add every board in the <span class="code">BOARDS</span> object in the JavaScript section. Each board must have a unique BLE name.</p>
-
-        <p>Example:</p>
-        <p><span class="code">'wheel01': { label: 'Wheel 01', color: '#00f5c4' }</span></p>
-
-        <h2>DATA FORMAT</h2>
-        <p>Firmware should send:</p>
-        <p><span class="code">sample,time_ms,ax,ay,az,gx,gy,gz</span></p>
-
-        <h2>GOOGLE DRIVE</h2>
-        <p>No Apps Script change is required if it already accepts <span class="code">csv</span> and <span class="code">filename</span>. Files are saved with board name in filename.</p>
+        <h2>SCALING</h2>
+        <p>Add more BLE names in the <span class="code">BOARDS</span> object. Example:</p>
+        <p><span class="code">'nrf41': { label: 'Wheel 3', color: '#ffd700' }</span></p>
       </div>
     </div>
 
@@ -1012,16 +913,8 @@ tr:hover td{
 
 <script>
 const BOARDS = {
-  'nrf33':  { label: 'nRF52833 DK', color: '#00f5c4' },
-  'nrf40':  { label: 'nRF52840 DK', color: '#00aaff' },
-
-  /*
-    For future modules, add like this:
-
-    'wheel01': { label: 'Wheel 01', color: '#ffd700' },
-    'wheel02': { label: 'Wheel 02', color: '#da70d6' },
-    'wheel03': { label: 'Wheel 03', color: '#ff8c00' },
-  */
+  'nrf33': { label: 'nRF52833 DK', color: '#00f5c4' },
+  'nrf40': { label: 'nRF52840 DK', color: '#00aaff' }
 };
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwxLg2AP1FrSoa91cxgH1g5KUi-YVhJIfdKh-GsELsWhA5QyoR7PZTRc1dL-qTFm2vVqA/exec';
@@ -1035,6 +928,15 @@ const MAX_PTS = 80;
 const connections = new Map();
 
 let pendingSave = null;
+let saveQueue = [];
+let activeBoard = 'ALL';
+
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+function safeId(name){
+  return String(name).replace(/[^a-zA-Z0-9_-]/g, '_');
+}
 
 function toast(msg, type=''){
   const el = document.createElement('div');
@@ -1044,15 +946,72 @@ function toast(msg, type=''){
   setTimeout(() => el.remove(), 3800);
 }
 
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
+function setText(id, value){
+  const el = document.getElementById(id);
+  if(el) el.textContent = value;
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.tcont').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById(`tab-${t.dataset.tab}`).classList.add('active');
-    if(t.dataset.tab === 'history') renderHistory();
+    tab.classList.add('active');
+    document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+
+    if(tab.dataset.tab === 'history'){
+      renderHistory();
+    }
   });
 });
+
+function openLiveTab(){
+  document.querySelector('.tab[data-tab="live"]').click();
+}
+
+function showAllBoards(){
+  activeBoard = 'ALL';
+
+  document.querySelectorAll('.board-panel').forEach(panel => {
+    panel.style.display = '';
+  });
+
+  document.querySelectorAll('.board-slot').forEach(slot => {
+    slot.classList.remove('selected');
+  });
+
+  updateSidebar();
+  openLiveTab();
+}
+
+function showBoardOnly(bname){
+  activeBoard = bname;
+
+  document.querySelectorAll('.board-panel').forEach(panel => {
+    panel.style.display = 'none';
+  });
+
+  const panel = document.getElementById(`panel-${safeId(bname)}`);
+
+  if(panel){
+    panel.style.display = '';
+    panel.scrollIntoView({
+      behavior:'smooth',
+      block:'start'
+    });
+  }
+
+  document.querySelectorAll('.board-slot').forEach(slot => {
+    slot.classList.remove('selected');
+  });
+
+  const slot = document.getElementById(`slot-${safeId(bname)}`);
+
+  if(slot){
+    slot.classList.add('selected');
+  }
+
+  openLiveTab();
+}
 
 document.getElementById('btnAddBoard').addEventListener('click', addBoard);
 
@@ -1067,13 +1026,13 @@ async function addBoard(){
 
     const device = await navigator.bluetooth.requestDevice({
       filters,
-      optionalServices: [NUS_SVC],
+      optionalServices:[NUS_SVC]
     });
 
     const bname = device.name || '';
 
     if(connections.has(bname)){
-      toast(`${bname} is already connected`, 'err');
+      toast(`${bname} already connected`, 'err');
       return;
     }
 
@@ -1089,16 +1048,16 @@ async function addBoard(){
       device,
       rxChar,
       txChar,
-      name: bname,
-      board: BOARDS[bname] || { label: bname, color: '#c8dff0' },
-      data: [],
-      buf: '',
-      start: null,
-      timer: null,
-      streaming: false,
-      rateArr: [],
-      accelChart: null,
-      gyroChart: null,
+      name:bname,
+      board:BOARDS[bname] || { label:bname, color:'#c8dff0' },
+      data:[],
+      buf:'',
+      start:null,
+      timer:null,
+      streaming:false,
+      rateArr:[],
+      accelChart:null,
+      gyroChart:null
     };
 
     connections.set(bname, conn);
@@ -1115,7 +1074,7 @@ async function addBoard(){
     toast(`Connected: ${conn.board.label}`, 'ok');
 
   }catch(e){
-    if(!String(e.message).includes('cancelled')){
+    if(!String(e.message).toLowerCase().includes('cancel')){
       toast(`BLE error: ${e.message}`, 'err');
     }
   }
@@ -1123,6 +1082,7 @@ async function addBoard(){
 
 function removeBoard(bname){
   const conn = connections.get(bname);
+
   if(!conn) return;
 
   if(conn.timer){
@@ -1132,8 +1092,10 @@ function removeBoard(bname){
   connections.delete(bname);
 
   const panel = document.getElementById(`panel-${safeId(bname)}`);
-  if(panel){
-    panel.remove();
+  if(panel) panel.remove();
+
+  if(activeBoard === bname){
+    activeBoard = 'ALL';
   }
 
   updateSidebar();
@@ -1152,8 +1114,6 @@ function disconnectBoard(bname){
     removeBoard(bname);
   }
 }
-
-const dec = new TextDecoder();
 
 function onNUS(bname, ev){
   const conn = connections.get(bname);
@@ -1178,14 +1138,14 @@ function onNUS(bname, ev){
     }
 
     const row = {
-      sample: parseInt(p[0]),
-      time_ms: parseInt(p[1]),
-      ax: parseFloat(p[2]),
-      ay: parseFloat(p[3]),
-      az: parseFloat(p[4]),
-      gx: parseFloat(p[5]),
-      gy: parseFloat(p[6]),
-      gz: parseFloat(p[7]),
+      sample:parseInt(p[0]),
+      time_ms:parseInt(p[1]),
+      ax:parseFloat(p[2]),
+      ay:parseFloat(p[3]),
+      az:parseFloat(p[4]),
+      gx:parseFloat(p[5]),
+      gy:parseFloat(p[6]),
+      gz:parseFloat(p[7])
     };
 
     if(isNaN(row.sample)){
@@ -1201,10 +1161,9 @@ function onNUS(bname, ev){
   }
 }
 
-const enc = new TextEncoder();
-
 async function startBoard(bname){
   const conn = connections.get(bname);
+
   if(!conn || conn.streaming) return;
 
   conn.data = [];
@@ -1216,47 +1175,84 @@ async function startBoard(bname){
   resetPanelCharts(bname);
   clearPanelTable(bname);
 
+  const saveBtn = document.getElementById(`pbtn-save-${safeId(bname)}`);
+  if(saveBtn) saveBtn.disabled = true;
+
   await conn.rxChar.writeValue(enc.encode('START'));
 
   startTimer(bname);
 
-  document.getElementById(`pbtn-start-${safeId(bname)}`).disabled = true;
-  document.getElementById(`pbtn-stop-${safeId(bname)}`).disabled = false;
+  const startBtn = document.getElementById(`pbtn-start-${safeId(bname)}`);
+  const stopBtn = document.getElementById(`pbtn-stop-${safeId(bname)}`);
+
+  if(startBtn) startBtn.disabled = true;
+  if(stopBtn) stopBtn.disabled = false;
 
   toast(`${conn.board.label} started`, 'ok');
 }
 
-async function stopBoard(bname){
+async function stopBoard(bname, openModalAfterStop = true){
   const conn = connections.get(bname);
-  if(!conn || !conn.streaming) return;
 
-  await conn.rxChar.writeValue(enc.encode('STOP'));
+  if(!conn || !conn.streaming){
+    return;
+  }
+
+  try{
+    await conn.rxChar.writeValue(enc.encode('STOP'));
+  }catch(e){
+    toast(`STOP failed for ${bname}: ${e.message}`, 'err');
+  }
 
   conn.streaming = false;
 
   if(conn.timer){
     clearInterval(conn.timer);
+    conn.timer = null;
   }
 
   const elapsed = conn.start ? ((Date.now() - conn.start) / 1000).toFixed(1) : '0.0';
 
-  document.getElementById(`pbtn-start-${safeId(bname)}`).disabled = false;
-  document.getElementById(`pbtn-stop-${safeId(bname)}`).disabled = true;
+  const startBtn = document.getElementById(`pbtn-start-${safeId(bname)}`);
+  const stopBtn = document.getElementById(`pbtn-stop-${safeId(bname)}`);
+  const saveBtn = document.getElementById(`pbtn-save-${safeId(bname)}`);
 
-  pendingSave = { bname, elapsed };
+  if(startBtn) startBtn.disabled = false;
+  if(stopBtn) stopBtn.disabled = true;
+  if(saveBtn) saveBtn.disabled = conn.data.length === 0;
 
-  document.getElementById('modalMeta').textContent =
-    `${conn.data.length} samples · ${elapsed}s · ${conn.board.label}`;
+  if(openModalAfterStop && conn.data.length > 0){
+    openSaveModal(bname, elapsed);
+  }
 
-  document.getElementById('overlay').classList.add('active');
+  if(openModalAfterStop && conn.data.length === 0){
+    toast(`${conn.board.label}: no rows to save`, 'err');
+  }
 }
 
 document.getElementById('btnStartAll').addEventListener('click', () => {
   connections.forEach((_, bname) => startBoard(bname));
 });
 
-document.getElementById('btnStopAll').addEventListener('click', () => {
-  connections.forEach((_, bname) => stopBoard(bname));
+document.getElementById('btnStopAll').addEventListener('click', async () => {
+  saveQueue = [];
+
+  for(const [bname, conn] of connections.entries()){
+    if(conn.streaming){
+      await stopBoard(bname, false);
+    }
+
+    if(conn.data.length > 0){
+      const elapsed = conn.start ? ((Date.now() - conn.start) / 1000).toFixed(1) : '0.0';
+
+      saveQueue.push({
+        bname,
+        elapsed
+      });
+    }
+  }
+
+  showNextSaveInQueue();
 });
 
 function startTimer(bname){
@@ -1266,7 +1262,6 @@ function startTimer(bname){
     if(!conn.start) return;
 
     const t = ((Date.now() - conn.start) / 1000).toFixed(1);
-
     const el = document.getElementById(`ptimer-${safeId(bname)}`);
 
     if(el){
@@ -1277,6 +1272,7 @@ function startTimer(bname){
 
 function calcRate(bname){
   const conn = connections.get(bname);
+
   if(!conn) return;
 
   const now = Date.now();
@@ -1305,20 +1301,21 @@ function createPanel(bname){
 
   div.innerHTML = `
     <div class="panel-header">
-      <div class="panel-dot on" style="background:${color};box-shadow:0 0 8px ${color};"></div>
+      <div class="panel-dot"></div>
       <div class="panel-name" style="color:${color}">${board.label}</div>
       <div class="panel-badge">${bname}</div>
 
       <div class="panel-acts">
         <button class="pbtn start" id="pbtn-start-${sid}" onclick="startBoard('${bname}')">▶ START</button>
         <button class="pbtn stop" id="pbtn-stop-${sid}" onclick="stopBoard('${bname}')" disabled>■ STOP</button>
+        <button class="pbtn save" id="pbtn-save-${sid}" onclick="openSaveModal('${bname}')" disabled>💾 SAVE</button>
         <button class="pbtn" onclick="disconnectBoard('${bname}')">✕</button>
       </div>
     </div>
 
     <div class="panel-body">
       <div class="panel-stats">
-        ${['AX','AY','AZ'].map(k=>`
+        ${['AX','AY','AZ'].map(k => `
           <div class="pstat">
             <div class="pstat-lbl">${k}</div>
             <div class="pstat-val" id="pstat-${k.toLowerCase()}-${sid}" style="color:${color}">--</div>
@@ -1326,7 +1323,7 @@ function createPanel(bname){
           </div>
         `).join('')}
 
-        ${['GX','GY','GZ'].map(k=>`
+        ${['GX','GY','GZ'].map(k => `
           <div class="pstat">
             <div class="pstat-lbl">${k}</div>
             <div class="pstat-val" id="pstat-${k.toLowerCase()}-${sid}" style="color:#da70d6">--</div>
@@ -1397,7 +1394,7 @@ function chartOpts(){
       legend:{
         labels:{
           color:'#4a7090',
-          font:{family:'IBM Plex Mono',size:8},
+          font:{family:'IBM Plex Mono', size:8},
           boxWidth:8,
           padding:6
         }
@@ -1412,7 +1409,7 @@ function chartOpts(){
       y:{
         ticks:{
           color:'#4a7090',
-          font:{family:'IBM Plex Mono',size:7}
+          font:{family:'IBM Plex Mono', size:7}
         },
         grid:{color:'rgba(26,48,80,.4)'},
         border:{color:'#1a3050'}
@@ -1432,9 +1429,9 @@ function initPanelCharts(bname, color){
     data:{
       labels,
       datasets:[
-        {label:'ax',data:blank(),borderColor:color,borderWidth:1.4,pointRadius:0,tension:.3},
-        {label:'ay',data:blank(),borderColor:'#00aaff',borderWidth:1.4,pointRadius:0,tension:.3},
-        {label:'az',data:blank(),borderColor:'#ff4466',borderWidth:1.4,pointRadius:0,tension:.3},
+        {label:'ax', data:blank(), borderColor:color, borderWidth:1.4, pointRadius:0, tension:.3},
+        {label:'ay', data:blank(), borderColor:'#00aaff', borderWidth:1.4, pointRadius:0, tension:.3},
+        {label:'az', data:blank(), borderColor:'#ff4466', borderWidth:1.4, pointRadius:0, tension:.3}
       ]
     },
     options:chartOpts()
@@ -1445,9 +1442,9 @@ function initPanelCharts(bname, color){
     data:{
       labels,
       datasets:[
-        {label:'gx',data:blank(),borderColor:'#ffd700',borderWidth:1.4,pointRadius:0,tension:.3},
-        {label:'gy',data:blank(),borderColor:'#ff8c00',borderWidth:1.4,pointRadius:0,tension:.3},
-        {label:'gz',data:blank(),borderColor:'#da70d6',borderWidth:1.4,pointRadius:0,tension:.3},
+        {label:'gx', data:blank(), borderColor:'#ffd700', borderWidth:1.4, pointRadius:0, tension:.3},
+        {label:'gy', data:blank(), borderColor:'#ff8c00', borderWidth:1.4, pointRadius:0, tension:.3},
+        {label:'gz', data:blank(), borderColor:'#da70d6', borderWidth:1.4, pointRadius:0, tension:.3}
       ]
     },
     options:chartOpts()
@@ -1456,6 +1453,7 @@ function initPanelCharts(bname, color){
 
 function pushPanelCharts(bname, r){
   const conn = connections.get(bname);
+
   if(!conn?.accelChart) return;
 
   const push = (chart, values) => {
@@ -1504,6 +1502,7 @@ function updatePanelLive(bname, r){
   setText(`pstat-gz-${sid}`, r.gz.toFixed(4));
 
   const tbody = document.getElementById(`ptbody-${sid}`);
+
   if(!tbody) return;
 
   if(tbody.children.length === 1 && tbody.children[0].children[0]?.colSpan === 7){
@@ -1526,6 +1525,11 @@ function updatePanelLive(bname, r){
 
   while(tbody.children.length > 40){
     tbody.removeChild(tbody.firstChild);
+  }
+
+  const saveBtn = document.getElementById(`pbtn-save-${sid}`);
+  if(saveBtn){
+    saveBtn.disabled = false;
   }
 }
 
@@ -1550,18 +1554,38 @@ function updateSidebar(){
   }
 
   list.innerHTML = [...connections.entries()].map(([bname, conn]) => `
-    <div class="board-slot active" style="--slot-color:${conn.board.color};">
+    <div
+      class="board-slot active ${activeBoard === bname ? 'selected' : ''}"
+      id="slot-${safeId(bname)}"
+      style="--slot-color:${conn.board.color};"
+      onclick="showBoardOnly('${bname}')"
+    >
       <div class="slot-header">
-        <div class="slot-dot on"></div>
+        <div class="slot-dot"></div>
         <div class="slot-name">${conn.board.label}</div>
-        <button class="slot-disc" onclick="disconnectBoard('${bname}')" title="Disconnect">✕</button>
+        <button
+          class="slot-disc"
+          onclick="event.stopPropagation(); disconnectBoard('${bname}')"
+          title="Disconnect"
+        >✕</button>
       </div>
+
       <div class="slot-stats">
         <span>${bname}</span>
         <span><b>${conn.data.length}</b> rows</span>
       </div>
     </div>
   `).join('');
+
+  list.innerHTML += `
+    <button
+      class="btn"
+      style="margin-top:10px;font-size:9px;padding:8px;"
+      onclick="showAllBoards()"
+    >
+      SHOW ALL BOARDS
+    </button>
+  `;
 }
 
 function updateGlobalButtons(){
@@ -1578,6 +1602,58 @@ function updateNoBoardsMsg(){
   document.getElementById('boardCount').textContent = connections.size;
 }
 
+function openSaveModal(bname, elapsedOverride = null){
+  const conn = connections.get(bname);
+
+  if(!conn){
+    toast('Board not found', 'err');
+    return;
+  }
+
+  if(conn.data.length === 0){
+    toast(`${conn.board.label}: no data to save`, 'err');
+    return;
+  }
+
+  const elapsed = elapsedOverride || (
+    conn.start ? ((Date.now() - conn.start) / 1000).toFixed(1) : '0.0'
+  );
+
+  pendingSave = {
+    bname,
+    elapsed
+  };
+
+  document.getElementById('modalMeta').textContent =
+    `${conn.data.length} samples · ${elapsed}s · ${conn.board.label} · ${bname}`;
+
+  document.getElementById('overlay').classList.add('active');
+}
+
+function showNextSaveInQueue(){
+  if(saveQueue.length === 0){
+    pendingSave = null;
+    document.getElementById('overlay').classList.remove('active');
+    toast('All board save dialogs completed', 'ok');
+    return;
+  }
+
+  const next = saveQueue.shift();
+
+  openSaveModal(next.bname, next.elapsed);
+}
+
+function finishCurrentSaveModal(){
+  document.getElementById('overlay').classList.remove('active');
+  pendingSave = null;
+
+  setTimeout(() => {
+    if(saveQueue.length > 0){
+      showNextSaveInQueue();
+    }
+  }, 250);
+}
+
 document.getElementById('btnSaveDrive').addEventListener('click', () => {
   if(pendingSave){
     saveSession(pendingSave.bname, 'drive');
@@ -1591,13 +1667,13 @@ document.getElementById('btnSaveLocal').addEventListener('click', () => {
 });
 
 document.getElementById('btnDiscard').addEventListener('click', () => {
-  document.getElementById('overlay').classList.remove('active');
-  pendingSave = null;
-  toast('Session discarded');
+  toast('Save skipped');
+  finishCurrentSaveModal();
 });
 
 function csvOf(bname){
   const conn = connections.get(bname);
+
   if(!conn) return '';
 
   return 'sample,time_ms,ax,ay,az,gx,gy,gz\n' +
@@ -1639,10 +1715,8 @@ async function saveSession(bname, method){
 
     storeHistory(fn, conn.data.length, false, conn.board.label, csv);
 
-    document.getElementById('overlay').classList.remove('active');
-    pendingSave = null;
-
     toast('CSV downloaded', 'ok');
+    finishCurrentSaveModal();
     return;
   }
 
@@ -1675,10 +1749,8 @@ async function saveSession(bname, method){
 
     storeHistory(fn, conn.data.length, true, conn.board.label, csv);
 
-    document.getElementById('overlay').classList.remove('active');
-    pendingSave = null;
-
     toast(`Saved to Drive: ${fn}`, 'ok');
+    finishCurrentSaveModal();
 
   }catch(e){
     toast(`Drive upload failed: ${e.message}`, 'err');
@@ -1696,7 +1768,7 @@ function storeHistory(fn, rows, onDrive, boardLabel, csv){
     rows,
     onDrive,
     boardLabel,
-    ts: new Date().toISOString(),
+    ts:new Date().toISOString(),
     csv
   });
 
@@ -1726,6 +1798,7 @@ function renderHistory(){
           ${s.onDrive ? ' · <span style="color:var(--green)">Drive</span>' : ''}
         </div>
       </div>
+
       <div class="sess-acts">
         <button class="btn-xs" onclick="dlHist(${i})">↓ CSV</button>
         <button class="btn-xs d" onclick="delHist(${i})">✕</button>
@@ -1756,20 +1829,10 @@ function delHist(i){
   renderHistory();
 }
 
-function setText(id, value){
-  const el = document.getElementById(id);
-  if(el){
-    el.textContent = value;
-  }
-}
-
-function safeId(name){
-  return String(name).replace(/[^a-zA-Z0-9_-]/g, '_');
-}
-
 renderHistory();
 updateNoBoardsMsg();
 updateGlobalButtons();
 </script>
+
 </body>
 </html>
